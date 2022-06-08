@@ -1,0 +1,67 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: dex
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: dex
+      version: '0.8.2'
+      sourceRef:
+        kind: HelmRepository
+        name: dex
+        namespace: flux-system
+  values:
+    envVars:
+      - name: IDP_CLIENT_ID
+        value: {{ .Values.admin.idp.clientID }}
+      - name: IDP_CLIENT_SECRET
+        value: {{ .Values.admin.idp.clientSecret }}
+    config:
+      # See https://dexidp.io/docs/storage/ for more options
+      storage:
+        type: kubernetes
+        config:
+          inCluster: true
+      issuer: {{ include "urls.admin_oidc_issuer" . }}
+      connectors:     
+        - type: {{ .Values.admin.idp.type }}
+          id: {{ printf "adminIDP-%s" .Values.admin.idp.type }}
+          name: {{ printf "adminIDP-%s" .Values.admin.idp.type }}
+          config:
+            # Credentials can be string literals or pulled from the environment.
+            clientID: $IDP_CLIENT_ID
+            clientSecret: $IDP_CLIENT_SECRET
+            redirectURI: {{ include "urls.admin_oidc_callback" . }}
+            # flag which will switch from using the internal GitHub id to the users handle (@mention) as the user id.
+            # It is possible for a user to change their own user name but it is very rare for them to do so
+            {{ if eq .Values.admin.idp.type "github" -}}
+            useLoginAsID: true
+            loadAllGroups: true
+            {{- else if eq .Values.admin.idp.type "oidc" -}}
+            issuerURL: {{ .Values.admin.idp.issuerURL }}
+            scopes:
+              - profile
+              - email
+              - groups
+            {{- end }}
+      staticClients:
+        - id: {{ include "names.admin_oidc_client" . }}
+          secret: {{ include "secrets.admin_oidc_client" . }}
+          name: "Admin OIDC"
+          redirectURIs: 
+            - {{ include "urls.admin_oidc_callback" . }}
+    ingress:
+      enabled: true
+      annotations:
+        cert-manager.io/cluster-issuer: acme
+      hosts:
+        - host: {{ include "hosts.admin_oidc" . }}
+          paths:
+            - path: /
+              pathType: ImplementationSpecific
+      tls:
+        - hosts:
+            - {{ include "hosts.admin_oidc" . }}
+          secretName: dex-cert

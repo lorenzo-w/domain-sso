@@ -1,0 +1,381 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: keycloak
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: keycloak
+      version: '9.1.1'
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+        namespace: flux-system
+  dependsOn:
+    - name: openldap
+  values:
+    auth:
+      adminUser: {{ include "names.keycloak_admin_user" . }}
+      adminPassword: {{ include "secrets.keycloak_admin_pw" . }}
+      managementUser: {{ include "names.keycloak_management_user" . }}
+      managementPassword: {{ include "secrets.keycloak_management_pw" . }}
+    ingress:
+      enabled: true
+      annotations:
+        cert-manager.io/cluster-issuer: acme
+      hostname: {{ include "hosts.keycloak" . }}
+      tls: true
+    service:
+      type: ClusterIP
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: keycloak-config
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: keycloak-config-cli
+      version: '1.2.3'
+      sourceRef:
+        kind: HelmRepository
+        name: jkroepke
+        namespace: flux-system
+  dependsOn:
+    - name: keycloak
+  values:
+    image:
+      tag: "5.2.0-18.0.0"
+    env: 
+      KEYCLOAK_URL: {{ include "urls.keycloak" . }}
+      KEYCLOAK_USER: {{ include "names.keycloak_admin_user" . }}
+      IMPORT_FILES_LOCATIONS: "/config/master.json"
+    secrets:
+      KEYCLOAK_PASSWORD: {{ include "secrets.keycloak_admin_pw" . }}
+    config: 
+      master:
+        inline:
+          enabled: true
+          realm: master
+          components:
+            org.keycloak.keys.KeyProvider:
+              - name: "rsa-generated"
+                providerId: "rsa-generated"
+                subComponents: {}
+                config: 
+                  privateKey: [""]
+                  certificate: [""] 
+                  priority: ["100"] 
+              - name: "aes-generated"
+                providerId: "aes-generated"
+                subComponents: {}
+                config: 
+                  priority: ["100"]
+              - name: "rsa-enc-generated"
+                providerId: "rsa-enc-generated"
+                subComponents: 
+                config: 
+                  priority: ["100"]
+                  algorithm: ["RSA-OAEP"]
+              - name: "hmac-generated"
+                providerId: "hmac-generated"
+                subComponents: 
+                config: 
+                  priority: ["100"]
+                  algorithm: ["HS256"]
+            org.keycloak.storage.UserStorageProvider:
+              - id: ldap
+                name: ldap
+                providerId: ldap
+                subComponents:
+                  org.keycloak.storage.ldap.mappers.LDAPStorageMapper:
+                    - name: last name
+                      providerId: user-attribute-ldap-mapper
+                      subComponents: {}
+                      config: 
+                        ldap.attribute: 
+                          - sn
+                        is.mandatory.in.ldap:
+                          - "true"
+                        read.only:
+                          - "false"
+                        always.read.value.from.ldap:
+                          - "true"
+                        user.model.attribute:
+                          - lastName
+                    - name: first name
+                      providerId: user-attribute-ldap-mapper
+                      subComponents: {}
+                      config: 
+                        ldap.attribute: 
+                          - givenName
+                        is.mandatory.in.ldap: 
+                          - "false"
+                        always.read.value.from.ldap: 
+                          - "true"
+                        read.only: 
+                          - "false"
+                        user.model.attribute: 
+                          - firstName
+                    - name: creation date
+                      providerId: user-attribute-ldap-mapper
+                      subComponents: {}
+                      config: 
+                        ldap.attribute: 
+                          - createTimestamp
+                        is.mandatory.in.ldap: 
+                          - "false"
+                        always.read.value.from.ldap: 
+                          - "true"
+                        read.only: 
+                          - "true"
+                        user.model.attribute: 
+                          - createTimestamp
+                    - name: modify date
+                      providerId: user-attribute-ldap-mapper
+                      subComponents: {}
+                      config: 
+                        ldap.attribute: 
+                          - modifyTimestamp
+                        is.mandatory.in.ldap: 
+                          - "false"
+                        read.only: 
+                          - "true"
+                        always.read.value.from.ldap: 
+                          - "true"
+                        user.model.attribute: 
+                          - modifyTimestamp
+                    - name: email
+                      providerId: user-attribute-ldap-mapper
+                      subComponents: {}
+                      config: 
+                        ldap.attribute: 
+                          - mail
+                        is.mandatory.in.ldap: 
+                          - "false"
+                        always.read.value.from.ldap: 
+                          - "true"
+                        read.only: 
+                          - "false"
+                        user.model.attribute: 
+                          - email
+                    - name: fullname
+                      providerId: full-name-ldap-mapper
+                      subComponents: {}
+                      config: 
+                        ldap.full.name.attribute:
+                          - cn
+                        read.only: 
+                          - "false"
+                        write.only:
+                          - "true"
+                    - name: groups
+                      providerId: group-ldap-mapper
+                      config:
+                        drop.non.existing.groups.during.sync:
+                          - "false"
+                        group.name.ldap.attribute:
+                          - cn
+                        group.object.classes:
+                          - groupOfNames
+                        groups.dn:
+                          - {{ include "dn.groups" . }}
+                        groups.ldap.filter: []
+                        groups.path:
+                          - /
+                        ignore.missing.groups:
+                          - "false"
+                        mapped.group.attributes: []
+                        memberof.ldap.attribute:
+                          - memberOf
+                        membership.attribute.type:
+                          - DN
+                        membership.ldap.attribute:
+                          - member
+                        membership.user.ldap.attribute:
+                          - uid
+                        mode:
+                          - LDAP_ONLY
+                        preserve.group.inheritance:
+                          - "true"
+                        user.roles.retrieve.strategy:
+                          - LOAD_GROUPS_BY_MEMBER_ATTRIBUTE
+                    - name: roles
+                      providerId: role-ldap-mapper
+                      config:
+                        client.id: []
+                        role.name.ldap.attribute:
+                          - cn
+                        role.object.classes:
+                          - groupOfNames
+                        roles.dn:
+                          - {{ include "dn.roles" . }}
+                        roles.ldap.filter: []
+                        memberof.ldap.attribute:
+                          - memberOf
+                        membership.attribute.type:
+                          - DN
+                        membership.ldap.attribute:
+                          - member
+                        membership.user.ldap.attribute:
+                          - uid
+                        mode:
+                          - LDAP_ONLY
+                        use.realm.roles.mapping:
+                          - "true"
+                        user.roles.retrieve.strategy:
+                          - LOAD_ROLES_BY_MEMBER_ATTRIBUTE
+                config: 
+                  pagination: 
+                    - "true"
+                  fullSyncPeriod: 
+                    - "600"
+                  connectionPooling: 
+                    - "true"
+                  usersDn:
+                    - {{ include "dn.users" . }}
+                  cachePolicy: 
+                    - DEFAULT
+                  useKerberosForPasswordAuthentication: 
+                    - "false"
+                  importEnabled: 
+                    - "true"
+                  enabled: 
+                    - "true"
+                  usernameLDAPAttribute: 
+                    - uid
+                  bindDn: 
+                    - {{ include "names.ldap_admin_dn" . }}
+                  bindCredential: 
+                    - {{ include "secrets.ldap_admin_pw" . | quote }}
+                  changedSyncPeriod: 
+                    - "-1"
+                  vendor: 
+                    - "other"
+                  uuidLDAPAttribute: 
+                    - "entryUUID"
+                  connectionUrl: 
+                    - {{ printf "ldap://openldap.%s.svc.cluster.local:389" .Release.Namespace }}
+                  allowKerberosAuthentication: 
+                    - "false"
+                  syncRegistrations: 
+                    - "true"
+                  authType: 
+                    - simple
+                  debug: 
+                    - "false"
+                  searchScope: 
+                    - "1"
+                  useTruststoreSpi: 
+                    - ldapsOnly
+                  priority: 
+                    - "0"
+                  trustEmail: 
+                    - "false"
+                  userObjectClasses: 
+                    - inetOrgPerson
+                    - organizationalPerson
+                  rdnLDAPAttribute: 
+                    - uid
+                  editMode: 
+                    - WRITABLE
+                  validatePasswordPolicy: 
+                    - "false"
+                  batchSizeForSync: 
+                    - "1000"
+          groups: 
+            - name: {{ .Values.admin.group | quote }}
+              realmRoles: 
+                - admin
+          identityProviders:
+            - alias: admin-oidc
+              displayName: "Admin OIDC"
+              providerId: oidc
+              enabled: true
+              trustEmail: true
+              # firstBrokerLoginFlowAlias: "first broker login"
+              # storeToken: false
+              # authenticateByDefault: false
+              # linkOnly: false
+              config:
+                clientId: {{ include "names.admin_oidc_client" . }}
+                clientAuthMethod: client_secret_post
+                clientSecret: {{ include "secrets.admin_oidc_client" . }}
+                tokenUrl: {{ include "urls.admin_oidc_token" . }}
+                authorizationUrl: {{ include "urls.admin_oidc_auth" . }}
+                validateSignature: "true"
+                useJwksUrl: "true"
+                jwksUrl: {{ include "urls.admin_oidc_jwks" . }}
+                syncMode: FORCE
+                defaultScope: "email groups profile openid"
+                guiOrder: 0
+                # backchannelSupported: true
+          identityProviderMappers:
+            - name: admin-oidc-email-mapper
+              identityProviderAlias: admin-oidc
+              identityProviderMapper: "oidc-user-attribute-idp-mapper"
+              config:
+                claim: email
+                user.attribute: email
+                # syncMode: FORCE
+            - name: admin-oidc-group-mapper
+              identityProviderAlias: admin-oidc
+              identityProviderMapper: "oidc-advanced-group-idp-mapper"
+              config:
+                claims: {{ printf "[{\"key\": \"groups\",\"value\": %s}]" (.Values.admin.group | quote) | quote }}
+                group: {{ .Values.admin.group | quote }}
+                # syncMode: FORCE
+          clients: 
+            - clientId: {{ include "names.oidc_client" . | quote }}
+              name: {{ printf "%s-oidc-client" .Values.domain }}
+              description: {{ printf "SSO for %s" .Values.domain | quote }}
+              enabled: true
+              clientAuthenticatorType: client-secret
+              secret: {{ include "secrets.oidc_client" . | quote }}
+              redirectUris: 
+                - {{ printf "https://*.%s/*" .Values.domain }}
+              webOrigins: 
+                - {{ printf "https://*.%s/*" .Values.domain }}
+            - clientId: {{ include "names.saml_client" . | quote }}
+              name: {{ printf "%s-saml-client" .Values.domain }}
+              description: {{ printf "SSO for %s" .Values.domain | quote }}
+              enabled: true
+              redirectUris: 
+                - {{ printf "https://*.%s/*" .Values.domain }}
+              webOrigins: 
+                - {{ printf "https://*.%s/*" .Values.domain }}
+              frontchannelLogout: true
+              protocol: saml
+              attributes:
+                saml.force.post.binding: "true"
+                saml.signing.certificate: ""
+                saml.signature.algorithm: RSA_SHA256
+                saml_name_id_format: email
+                saml.signing.private.key: ""
+              protocolMappers:
+                - name: firstName
+                  protocol: saml
+                  protocolMapper: saml-user-attribute-mapper
+                  config:
+                    attribute.nameformat: Basic
+                    user.attribute: firstName
+                    attribute.name: cn
+  valuesFrom:
+    - kind: Secret
+      name: keycloak-certs
+      valuesKey: idp-crt
+      targetPath: "config.master.inline.components.org\.keycloak\.keys\.KeyProvider[0].config.certificate[0]"
+    - kind: Secret
+      name: keycloak-certs
+      valuesKey: idp-key
+      targetPath: "config.master.inline.components.org\.keycloak\.keys\.KeyProvider[0].config.privateKey[0]"
+    - kind: Secret
+      name: keycloak-certs
+      valuesKey: saml-client-crt
+      targetPath: "config.master.inline.clients[1].attributes.saml\.signing\.certificate"
+    - kind: Secret
+      name: keycloak-certs
+      valuesKey: saml-client-key
+      targetPath: "config.master.inline.clients[1].attributes.saml\.signing\.private\.key"

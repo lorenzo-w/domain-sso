@@ -1,0 +1,143 @@
+{{- define "hosts.keycloak" -}}
+{{ printf "%s.%s" .Values.subdomains.keycloak .Values.domain }}
+{{- end -}}
+{{- define "urls.keycloak" -}}
+{{ printf "https://%s" (include "hosts.keycloak" .) }}
+{{- end -}}
+
+{{- define "urls.idp" -}}
+{{ printf "https://%s/realms/master" (include "hosts.keycloak" .) }}
+{{- end -}}
+{{- define "urls.idp_saml_entrypoint" -}}
+{{ printf "%s/protocol/saml" (include "urls.idp" .) }}
+{{- end -}}
+
+{{- define "urls.admin_oidc_callback" -}}
+{{ printf "%s/broker/admin-oidc/endpoint" (include "urls.idp" .) }}
+{{- end -}}
+
+{{- define "hosts.admin_oidc" -}}
+{{ printf "%s.%s" .Values.subdomains.dex .Values.domain }}
+{{- end -}}
+{{- define "urls.admin_oidc_issuer" -}}
+{{ printf "https://%s" (include "hosts.admin_oidc" .) }}
+{{- end -}}
+{{- define "urls.admin_oidc_callback" -}}
+{{ printf "https://%s/callback" (include "hosts.admin_oidc" .) }}
+{{- end -}}
+{{- define "urls.admin_oidc_token" -}}
+{{ printf "https://%s/token" (include "hosts.admin_oidc" .) }}
+{{- end -}}
+{{- define "urls.admin_oidc_auth" -}}
+{{ printf "https://%s/auth" (include "hosts.admin_oidc" .) }}
+{{- end -}}
+{{- define "urls.admin_oidc_jwks" -}}
+{{ printf "https://%s/keys" (include "hosts.admin_oidc" .) }}
+{{- end -}}
+
+{{- define "hosts.authproxy" -}}
+{{ printf "%s.%s" .Values.subdomains.oauth2_proxy .Values.domain }}
+{{- end -}}
+{{- define "urls.authproxy_login" -}}
+{{ printf "https://%s/oauth2/start" (include "hosts.authproxy" .) }}
+{{- end -}}
+{{- define "urls.authproxy_check" -}}
+{{ printf "http://oauth2-proxy.%s.svc.cluster.local/oauth2/auth" .Release.Namespace }}
+{{- end -}}
+{{- define "urls.authproxy_callback" -}}
+{{ printf "https://%s/oauth2/callback" (include "hosts.authproxy" .) }}
+{{- end -}}
+
+{{- define "hosts.phpldapadmin" -}}
+{{ printf "%s.%s" .Values.subdomains.phpldapadmin .Values.domain }}
+{{- end -}}
+
+{{- define "names.oidc_client" -}}
+{{ "local-oidc" }}
+{{- end -}}
+{{- define "secrets.oidc_client" -}}
+{{ derivePassword 1 "maximum" .Values.secretSeed "local-oidc-client" .Values.domain | b64enc }}
+{{- end -}}
+
+{{- define "names.admin_oidc_client" -}}
+{{ "local-admin-oidc" }}
+{{- end -}}
+{{- define "secrets.admin_oidc_client" -}}
+{{ derivePassword 1 "maximum" .Values.secretSeed "admin-oidc-client" .Values.domain | b64enc }}
+{{- end -}}
+
+{{- define "names.saml_client" -}}
+{{ "local-saml" }}
+{{- end -}}
+
+{{- define "names.ldap_admin_dn" -}}
+{{ printf "cn=admin,dc=%s" (.Values.domain | splitList "." | join ",dc=") | quote }}
+{{- end -}}
+{{- define "secrets.ldap_admin_pw" -}}
+{{ derivePassword 1 "maximum" .Values.secretSeed "openldap-admin" .Values.domain | b64enc }}
+{{- end -}}
+{{- define "secrets.ldap_config_pw" -}}
+{{ derivePassword 1 "maximum" .Values.secretSeed "openldap-config" .Values.domain | b64enc }}
+{{- end -}}
+
+{{- define "names.keycloak_admin_user" -}}
+{{ "admin" }}
+{{- end -}}
+{{- define "secrets.keycloak_admin_pw" -}}
+{{ derivePassword 1 "maximum" .Values.secretSeed "keycloak-admin" .Values.domain | b64enc }}
+{{- end -}}
+{{- define "names.keycloak_management_user" -}}
+{{ "admin" }}
+{{- end -}}
+{{- define "secrets.keycloak_management_pw" -}}
+{{ derivePassword 1 "maximum" .Values.secretSeed "keycloak-management" .Values.domain | b64enc }}
+{{- end -}}
+
+{{- define "dn.base" -}}
+{{ printf "dc=%s" (.Values.domain | splitList "." | join ",dc=") }}
+{{- end -}}
+{{- define "dn.users" -}}
+{{ printf "ou=users,dc=%s" (.Values.domain | splitList "." | join ",dc=") }}
+{{- end -}}
+{{- define "dn.groups" -}}
+{{ printf "ou=groups,dc=%s" (.Values.domain | splitList "." | join ",dc=") }}
+{{- end -}}
+{{- define "dn.roles" -}}
+{{ printf "ou=roles,dc=%s" (.Values.domain | splitList "." | join ",dc=") }}
+{{- end -}}
+
+{{- if not (include "common.secrets.exists" (dict "secret" "sso-config" "context" $)) -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sso-config
+type: Opaque
+data:
+  idp-url: {{ include "urls.idp" . }}
+  {{- $idp := genSelfSignedCert .Values.domain nil nil 3650 -}}
+  idp-crt: {{ $saml_issuer.Cert | b64enc }}
+  idp-key: {{ $saml_issuer.Key | b64enc }}
+
+  oidc-issuer-url: {{ include "urls.idp" . }}
+  oidc-client-id: {{ include "names.oidc_client" . }}
+  oidc-client-secret: {{ include "secrets.oidc_client" . }}
+
+  saml-entrypoint-url: {{ include "urls.idp_saml_entrypoint" . }}
+  saml-client-name: {{ include "names.saml_client" . }}
+  {{- $saml_client := genSelfSignedCert .Values.domain nil nil 3650 -}}
+  saml-client-crt: {{ $saml_client.Cert | b64enc }}
+  saml-client-key: {{ $saml_client.Key | b64enc }}
+
+  ldap-base-dn: {{ include "dn.base" . }}
+  ldap-admin-dn: {{ include "names.ldap_admin_dn" . }}
+  ldap-admin-pw: {{ include "secrets.ldap_admin_pw" . }}
+  ldap-config-pw: {{ include "secrets.ldap_config_pw" . }}
+  ldap-users-dn: {{ include "dn.users" . }}
+  ldap-groups-dn: {{ include "dn.groups" . }}
+  ldap-roles-dn: {{ include "dn.roles" . }}
+
+  authproxy-login-url: {{ include "urls.authproxy_login" . }}
+  authproxy-check-url: {{ include "urls.authproxy_check" . }}
+  authproxy-callback-url: {{ include "urls.authproxy_callback" . }}
+---
+{{- end -}}
