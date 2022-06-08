@@ -106,6 +106,16 @@
 {{ printf "ou=roles,dc=%s" (.Values.domain | splitList "." | join ",dc=") }}
 {{- end -}}
 
+{{- define "class.users" -}}
+inetOrgPerson
+{{- end -}}
+{{- define "class.groups" -}}
+groupOfNames
+{{- end -}}
+{{- define "class.roles" -}}
+groupOfNames
+{{- end -}}
+
 {{- if not (include "common.secrets.exists" (dict "secret" "sso-config" "context" $)) -}}
 apiVersion: v1
 kind: Secret
@@ -113,31 +123,38 @@ metadata:
   name: sso-config
 type: Opaque
 data:
-  idp-url: {{ include "urls.idp" . }}
+  idp_url: {{ include "urls.idp" . | b64enc }}
   {{- $idp := genSelfSignedCert .Values.domain nil nil 3650 -}}
-  idp-crt: {{ $saml_issuer.Cert | b64enc }}
-  idp-key: {{ $saml_issuer.Key | b64enc }}
+  idp_crt: {{ $saml_issuer.Cert | b64enc }}
+  idp_key: {{ $saml_issuer.Key | b64enc }}
 
-  oidc-issuer-url: {{ include "urls.idp" . }}
-  oidc-client-id: {{ include "names.oidc_client" . }}
-  oidc-client-secret: {{ include "secrets.oidc_client" . }}
+  admin_group: {{ .Values.admin.group | b64enc }}
 
-  saml-entrypoint-url: {{ include "urls.idp_saml_entrypoint" . }}
-  saml-client-name: {{ include "names.saml_client" . }}
+  oidc_issuer_url: {{ include "urls.idp" .  | b64enc }}
+  oidc_client_id: {{ include "names.oidc_client" .  | b64enc }}
+  oidc_client_secret: {{ include "secrets.oidc_client" .  | b64enc }}
+
+  saml_entrypoint_url: {{ include "urls.idp_saml_entrypoint" . | b64enc }}
+  saml_client_name: {{ include "names.saml_client" . | b64enc }}
   {{- $saml_client := genSelfSignedCert .Values.domain nil nil 3650 -}}
-  saml-client-crt: {{ $saml_client.Cert | b64enc }}
-  saml-client-key: {{ $saml_client.Key | b64enc }}
+  saml_client_crt: {{ $saml_client.Cert | b64enc }}
+  saml_client_key: {{ $saml_client.Key | b64enc }}
 
-  ldap-base-dn: {{ include "dn.base" . }}
-  ldap-admin-dn: {{ include "names.ldap_admin_dn" . }}
-  ldap-admin-pw: {{ include "secrets.ldap_admin_pw" . }}
-  ldap-config-pw: {{ include "secrets.ldap_config_pw" . }}
-  ldap-users-dn: {{ include "dn.users" . }}
-  ldap-groups-dn: {{ include "dn.groups" . }}
-  ldap-roles-dn: {{ include "dn.roles" . }}
+  ldap_host: {{ printf "openldap.%s.svc.cluster.local" .Release.Namespace | b64enc }}
+  ldap_port: {{ "389" | b64enc }}
+  ldap_base_dn: {{ include "dn.base" . | b64enc }}
+  ldap_admin_dn: {{ include "names.ldap_admin_dn" . | b64enc }}
+  ldap_admin_pw: {{ include "secrets.ldap_admin_pw" . | b64enc }}
+  ldap_config_pw: {{ include "secrets.ldap_config_pw" . | b64enc }}
+  ldap_users_dn: {{ include "dn.users" . | b64enc }}
+  ldap_groups_dn: {{ include "dn.groups" . | b64enc }}
+  ldap_roles_dn: {{ include "dn.roles" . | b64enc }}
+  ldap_users_class: {{ include "class.users" . | b64enc }}
+  ldap_groups_class: {{ include "class.groups" . | b64enc }}
+  ldap_roles_class: {{ include "class.roles" . | b64enc }}
 
-  authproxy-login-url: {{ include "urls.authproxy_login" . }}
-  authproxy-check-url: {{ include "urls.authproxy_check" . }}
-  authproxy-callback-url: {{ include "urls.authproxy_callback" . }}
+  authproxy_login_url: {{ include "urls.authproxy_login" . | b64enc }}
+  authproxy_check_url: {{ include "urls.authproxy_check" . | b64enc }}
+  authproxy_callback_url: {{ include "urls.authproxy_callback" . | b64enc }}
 ---
 {{- end -}}

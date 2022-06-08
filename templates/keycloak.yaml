@@ -179,7 +179,7 @@ spec:
                         group.name.ldap.attribute:
                           - cn
                         group.object.classes:
-                          - groupOfNames
+                          - {{ include "class.groups" . }}
                         groups.dn:
                           - {{ include "dn.groups" . }}
                         groups.ldap.filter: []
@@ -209,7 +209,7 @@ spec:
                         role.name.ldap.attribute:
                           - cn
                         role.object.classes:
-                          - groupOfNames
+                          - {{ include "class.roles" . }}
                         roles.dn:
                           - {{ include "dn.roles" . }}
                         roles.ldap.filter: []
@@ -275,8 +275,7 @@ spec:
                   trustEmail: 
                     - "false"
                   userObjectClasses: 
-                    - inetOrgPerson
-                    - organizationalPerson
+                    - {{ include "class.users" . }}
                   rdnLDAPAttribute: 
                     - uid
                   editMode: 
@@ -365,17 +364,17 @@ spec:
   valuesFrom:
     - kind: Secret
       name: keycloak-certs
-      valuesKey: idp-crt
+      valuesKey: idp_crt
       targetPath: "config.master.inline.components.org\.keycloak\.keys\.KeyProvider[0].config.certificate[0]"
     - kind: Secret
       name: keycloak-certs
-      valuesKey: idp-key
+      valuesKey: idp_key
       targetPath: "config.master.inline.components.org\.keycloak\.keys\.KeyProvider[0].config.privateKey[0]"
     - kind: Secret
       name: keycloak-certs
-      valuesKey: saml-client-crt
+      valuesKey: saml_client_crt
       targetPath: "config.master.inline.clients[1].attributes.saml\.signing\.certificate"
     - kind: Secret
       name: keycloak-certs
-      valuesKey: saml-client-key
+      valuesKey: saml_client_key
       targetPath: "config.master.inline.clients[1].attributes.saml\.signing\.private\.key"
