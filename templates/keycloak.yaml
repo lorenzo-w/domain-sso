@@ -11,7 +11,6 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: bitnami
-        namespace: flux-system
   dependsOn:
     - name: openldap
   values:
@@ -42,7 +41,6 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: jkroepke
-        namespace: flux-system
   dependsOn:
     - name: keycloak
   values:
