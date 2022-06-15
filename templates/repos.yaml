@@ -3,7 +3,6 @@ apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: GitRepository
 metadata:
   name: self
-  namespace: flux-system
 spec:
   interval: 5m0s
   url: {{ .Values.repo.url }}
@@ -14,7 +13,6 @@ apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: bitnami
-  namespace: flux-system
 spec:
   interval: 10m
   url: https://charts.bitnami.com/bitnami
@@ -23,7 +21,6 @@ apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: jkroepke
-  namespace: flux-system
 spec:
   interval: 10m
   url: https://jkroepke.github.io/helm-charts/
@@ -32,7 +29,6 @@ apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: helm-openldap
-  namespace: flux-system
 spec:
   interval: 10m
   url: https://jp-gouin.github.io/helm-openldap/
@@ -41,7 +37,6 @@ apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: oauth2-proxy
-  namespace: {{ .Release.Namespace }}
 spec:
   interval: 10m
   url: https://oauth2-proxy.github.io/manifests
@@ -50,7 +45,6 @@ apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: dex
-  namespace: {{ .Release.Namespace }}
 spec:
   interval: 10m
   url: https://charts.dexidp.io
