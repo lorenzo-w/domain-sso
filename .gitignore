@@ -2,3 +2,4 @@
 /values.local.yaml
 /rendered
 /kubeconfig
+/charts
