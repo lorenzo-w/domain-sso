@@ -363,18 +363,18 @@ spec:
                     attribute.name: cn
   valuesFrom:
     - kind: Secret
-      name: keycloak-certs
+      name: {{ .Values.configSecretName }}
       valuesKey: idp_crt
-      targetPath: "config.master.inline.components.org\.keycloak\.keys\.KeyProvider[0].config.certificate[0]"
+      targetPath: "config.master.inline.components.org\\.keycloak\\.keys\\.KeyProvider[0].config.certificate[0]"
     - kind: Secret
-      name: keycloak-certs
+      name: {{ .Values.configSecretName }}
       valuesKey: idp_key
-      targetPath: "config.master.inline.components.org\.keycloak\.keys\.KeyProvider[0].config.privateKey[0]"
+      targetPath: "config.master.inline.components.org\\.keycloak\\.keys\\.KeyProvider[0].config.privateKey[0]"
     - kind: Secret
-      name: keycloak-certs
+      name: {{ .Values.configSecretName }}
       valuesKey: saml_client_crt
-      targetPath: "config.master.inline.clients[1].attributes.saml\.signing\.certificate"
+      targetPath: "config.master.inline.clients[1].attributes.saml\\.signing\\.certificate"
     - kind: Secret
-      name: keycloak-certs
+      name: {{ .Values.configSecretName }}
       valuesKey: saml_client_key
-      targetPath: "config.master.inline.clients[1].attributes.saml\.signing\.private\.key"
+      targetPath: "config.master.inline.clients[1].attributes.saml\\.signing\\.private\\.key"
