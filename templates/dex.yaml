@@ -33,7 +33,7 @@ spec:
             # Credentials can be string literals or pulled from the environment.
             clientID: $IDP_CLIENT_ID
             clientSecret: $IDP_CLIENT_SECRET
-            redirectURI: {{ include "urls.admin_oidc_callback" . }}
+            redirectURI: {{ include "urls.admin_oidc_callback_external" . }}
             # flag which will switch from using the internal GitHub id to the users handle (@mention) as the user id.
             # It is possible for a user to change their own user name but it is very rare for them to do so
             {{ if eq .Values.admin.idp.type "github" -}}
@@ -51,7 +51,7 @@ spec:
           secret: {{ include "secrets.admin_oidc_client" . }}
           name: "Admin OIDC"
           redirectURIs: 
-            - {{ include "urls.admin_oidc_callback" . }}
+            - {{ include "urls.admin_oidc_callback_internal" . }}
     ingress:
       enabled: true
       annotations:

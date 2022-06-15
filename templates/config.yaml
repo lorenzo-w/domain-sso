@@ -12,7 +12,7 @@
 {{ printf "%s/protocol/saml" (include "urls.idp" .) }}
 {{- end -}}
 
-{{- define "urls.admin_oidc_callback" -}}
+{{- define "urls.admin_oidc_callback_internal" -}}
 {{ printf "%s/broker/admin-oidc/endpoint" (include "urls.idp" .) }}
 {{- end -}}
 
@@ -22,7 +22,7 @@
 {{- define "urls.admin_oidc_issuer" -}}
 {{ printf "https://%s" (include "hosts.admin_oidc" .) }}
 {{- end -}}
-{{- define "urls.admin_oidc_callback" -}}
+{{- define "urls.admin_oidc_callback_external" -}}
 {{ printf "https://%s/callback" (include "hosts.admin_oidc" .) }}
 {{- end -}}
 {{- define "urls.admin_oidc_token" -}}
@@ -120,7 +120,7 @@ groupOfNames
 apiVersion: v1
 kind: Secret
 metadata:
-  name: sso-config
+  name: {{ .Values.configSecretName }}
 type: Opaque
 data:
   idp_url: {{ include "urls.idp" . | b64enc }}
