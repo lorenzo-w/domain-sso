@@ -20,11 +20,13 @@ org:
 
 subdomains:
   # Under which subdomains of your supplied root domain should the various services run? (Created automatically by external-dns)
-  keycloak: "sso"
-  dex: "admin-oidc"
+  keycloak: "idp"
+  dex: "oidc"
   oauth2_proxy: "auth"
   phpldapadmin: "ldap"
 
 repo:
   url: "https://github.com/lorenzo-w/domain-sso"
   branch: "main"
+
+configSecretName: sso-config # Where to store generated SSO config values (overridden, if exists)
