@@ -124,7 +124,7 @@ metadata:
 type: Opaque
 data:
   idp_url: {{ include "urls.idp" . | b64enc }}
-  {{- $idp_id := genSelfSignedCert .Values.domain nil nil 3650 -}}
+  {{ $idp_id := genSelfSignedCert .Values.domain nil nil 3650 -}}
   idp_crt: {{ $idp_id.Cert | b64enc }}
   idp_key: {{ $idp_id.Key | b64enc }}
 
@@ -136,7 +136,7 @@ data:
 
   saml_entrypoint_url: {{ include "urls.idp_saml_entrypoint" . | b64enc }}
   saml_client_name: {{ include "names.saml_client" . | b64enc }}
-  {{- $saml_client_id := genSelfSignedCert .Values.domain nil nil 3650 -}}
+  {{ $saml_client_id := genSelfSignedCert .Values.domain nil nil 3650 -}}
   saml_client_crt: {{ $saml_client_id.Cert | b64enc }}
   saml_client_key: {{ $saml_client_id.Key | b64enc }}
 
