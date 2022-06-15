@@ -41,7 +41,6 @@ apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: oauth2-proxy
-  namespace: flux-system
 spec:
   interval: 10m
   url: https://oauth2-proxy.github.io/manifests
@@ -50,7 +49,6 @@ apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: dex
-  namespace: flux-system
 spec:
   interval: 10m
   url: https://charts.dexidp.io
