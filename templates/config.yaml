@@ -124,9 +124,9 @@ metadata:
 type: Opaque
 data:
   idp_url: {{ include "urls.idp" . | b64enc }}
-  {{- $idp := genSelfSignedCert .Values.domain nil nil 3650 -}}
-  idp_crt: {{ $saml_issuer.Cert | b64enc }}
-  idp_key: {{ $saml_issuer.Key | b64enc }}
+  {{- $idp_id := genSelfSignedCert .Values.domain nil nil 3650 -}}
+  idp_crt: {{ $idp_id.Cert | b64enc }}
+  idp_key: {{ $idp_id.Key | b64enc }}
 
   admin_group: {{ .Values.admin.group | b64enc }}
 
@@ -136,9 +136,9 @@ data:
 
   saml_entrypoint_url: {{ include "urls.idp_saml_entrypoint" . | b64enc }}
   saml_client_name: {{ include "names.saml_client" . | b64enc }}
-  {{- $saml_client := genSelfSignedCert .Values.domain nil nil 3650 -}}
-  saml_client_crt: {{ $saml_client.Cert | b64enc }}
-  saml_client_key: {{ $saml_client.Key | b64enc }}
+  {{- $saml_client_id := genSelfSignedCert .Values.domain nil nil 3650 -}}
+  saml_client_crt: {{ $saml_client_id.Cert | b64enc }}
+  saml_client_key: {{ $saml_client_id.Key | b64enc }}
 
   ldap_host: {{ printf "openldap.%s.svc.cluster.local" .Release.Namespace | b64enc }}
   ldap_port: {{ "389" | b64enc }}
