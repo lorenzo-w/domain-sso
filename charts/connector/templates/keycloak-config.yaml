@@ -21,6 +21,7 @@ spec:
       IMPORT_MANAGED_CLIENTS: "no-delete" # Do not delete existing clients, just add new ones
       KEYCLOAK_AVAILABILITYCHECK_ENABLED: "true" # Wait until Keycloak is available
       KEYCLOAK_AVAILABILITYCHECK_TIMEOUT: "300s"
+      DEBUG: "true"
     secrets:
       KEYCLOAK_PASSWORD: {{ include "get_sso_config" (dict "key" "keycloak_admin_pw" "context" $) }}
     config: 
@@ -40,8 +41,12 @@ spec:
               {{ end -}}
               webOrigins: 
                 - "*"
+              defaultClientScopes:
+                - email
+                - profile
               optionalClientScopes:
                 - groups
+                - roles
             {{ end -}}
             {{ range $client := .Values.clients.saml -}}
             - clientId: {{ $client.id }}
