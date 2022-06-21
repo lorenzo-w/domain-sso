@@ -21,12 +21,13 @@ spec:
       IMPORT_MANAGED_CLIENTS: "no-delete" # Do not delete existing clients, just add new ones
       KEYCLOAK_AVAILABILITYCHECK_ENABLED: "true" # Wait until Keycloak is available
       KEYCLOAK_AVAILABILITYCHECK_TIMEOUT: "300s"
-      DEBUG: "true"
     secrets:
       KEYCLOAK_PASSWORD: {{ include "get_sso_config" (dict "key" "keycloak_admin_pw" "context" $) }}
     config: 
       master:
         inline:
+          enabled: true
+          realm: master
           clients: 
             {{ range $client := .Values.clients.oidc -}}
             - clientId: {{ $client.id }}
