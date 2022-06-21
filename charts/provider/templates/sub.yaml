@@ -20,3 +20,4 @@ spec:
     urls:
       authproxy_callback: {{ include "urls.authproxy_callback" . }}
     admin: {{ .Values.admin | toYaml | nindent 6 }}
+    domain: {{ .Values.domain }}

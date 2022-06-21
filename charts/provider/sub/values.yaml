@@ -7,4 +7,6 @@ hosts:
 urls:
   authproxy_callback: ""
 
+domain: ""
+
 admin: {}
