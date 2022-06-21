@@ -11,11 +11,6 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: dex
-  valuesFrom:
-    - kind: Secret
-      name: {{ .Values.configSecretName }}
-      valuesKey: internal_oidc_client_secret
-      targetPath: "config.staticClients[0].secret"
   values:
     envVars:
       - name: IDP_CLIENT_ID
@@ -55,17 +50,17 @@ spec:
           secret: ""
           name: "Admin OIDC"
           redirectURIs: 
-            - {{ include "urls.idp_oidc_callback" . }}
+            - {{ include "urls.keycloak_oidc_callback" . }}
     ingress:
       enabled: true
       annotations:
         cert-manager.io/cluster-issuer: acme
       hosts:
-        - host: {{ include "hosts.admin_oidc" . }}
+        - host: {{ .Values.hosts.dex }}
           paths:
             - path: /
               pathType: ImplementationSpecific
       tls:
         - hosts:
-            - {{ include "hosts.admin_oidc" . }}
+            - {{ .Values.hosts.dex }}
           secretName: dex-cert

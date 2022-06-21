@@ -1,0 +1,10 @@
+apiVersion: v2
+name: domain-sso-provider-sub
+description: Deploy charts that need sso-config secret to exist for templating phase
+type: application
+version: "0.1.0"
+appVersion: "0.1.0"
+dependencies:
+  - name: common
+    version: "1.16.0"
+    repository: https://charts.bitnami.com/bitnami

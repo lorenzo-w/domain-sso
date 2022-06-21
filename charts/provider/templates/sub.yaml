@@ -1,0 +1,20 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: sso-provider-sub
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: charts/provider/sub
+      sourceRef:
+        kind: GitRepository
+        name: self
+  values:
+    configSecretName: {{ .Values.configSecretName }}
+    hosts:
+      keycloak: {{ include "hosts.keycloak" . }}
+      dex: {{ printf "%s.%s" .Values.subdomains.dex .Values.domain }}
+    urls:
+      authproxy_callback: {{ include "urls.authproxy_callback" . }}
+    admin: {{ .Values.admin | toYaml | nindent 6 }}

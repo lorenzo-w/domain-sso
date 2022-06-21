@@ -1,6 +1,7 @@
+{{- $idp_cert_secret := include "get_sso_config" (dict "key" "idp_cert_secret" "context" $) -}}
 {{- $idp_cert := dict "tls.crt" "" "tls.key" "" }}
 
-{{- if not (include "common.secrets.exists" (dict "secret" "idp-cert" "context" $)) -}}
+{{- if not (include "common.secrets.exists" (dict "secret" $idp_cert_secret "context" $)) -}}
 {{- $gen_cert := genSelfSignedCert .Values.domain nil nil 3650 -}}
 apiVersion: v1
 kind: Secret
@@ -15,7 +16,7 @@ data:
 ---
 {{- $idp_cert = dict "tls.crt" $gen_cert.Cert "tls.key" $gen_cert.Key }}
 {{- else -}}
-{{- $idp_cert = (lookup "v1" "Secret" .Release.Namespace "idp-cert").data -}}
+{{- $idp_cert = (lookup "v1" "Secret" .Release.Namespace $idp_cert_secret).data -}}
 {{- end -}}
 
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
@@ -50,7 +51,7 @@ spec:
       enabled: true
       annotations:
         cert-manager.io/cluster-issuer: acme
-      hostname: {{ include "hosts.keycloak" . }}
+      hostname: {{ .Values.hosts.keycloak }}
       tls: true
     service:
       type: ClusterIP
@@ -91,7 +92,7 @@ spec:
     image:
       tag: "5.2.0-18.0.0"
     env: 
-      KEYCLOAK_URL: {{ include "urls.keycloak" . }}
+      KEYCLOAK_URL: {{ printf "https://%s" .Values.hosts.keycloak }}
       KEYCLOAK_USER: admin
       IMPORT_FILES_LOCATIONS: "/config/master.json"
     config: 
@@ -221,9 +222,9 @@ spec:
                         group.name.ldap.attribute:
                           - cn
                         group.object.classes:
-                          - {{ include "class.groups" . }}
+                          - {{ include "get_sso_config" (dict "key" "ldap_groups_class" "context" $) }}
                         groups.dn:
-                          - {{ include "dn.groups" . }}
+                          - {{ include "get_sso_config" (dict "key" "ldap_groups_dn" "context" $) }}
                         groups.ldap.filter: []
                         groups.path:
                           - /
@@ -251,9 +252,9 @@ spec:
                         role.name.ldap.attribute:
                           - cn
                         role.object.classes:
-                          - {{ include "class.roles" . }}
+                          - {{ include "get_sso_config" (dict "key" "ldap_roles_class" "context" $) }}
                         roles.dn:
-                          - {{ include "dn.roles" . }}
+                          - {{ include "get_sso_config" (dict "key" "ldap_roles_dn" "context" $) }}
                         roles.ldap.filter: []
                         memberof.ldap.attribute:
                           - memberOf
@@ -277,7 +278,7 @@ spec:
                   connectionPooling: 
                     - "true"
                   usersDn:
-                    - {{ include "dn.users" . }}
+                    - {{ include "get_sso_config" (dict "key" "ldap_users_dn" "context" $) }}
                   cachePolicy: 
                     - DEFAULT
                   useKerberosForPasswordAuthentication: 
@@ -289,9 +290,9 @@ spec:
                   usernameLDAPAttribute: 
                     - uid
                   bindDn: 
-                    - {{ include "dn.admin" . }}
+                    - {{ include "get_sso_config" (dict "key" "ldap_admin_dn" "context" $) }}
                   bindCredential: 
-                    - ""
+                    - {{ include "get_sso_config" (dict "key" "ldap_admin_pw" "context" $) }}
                   changedSyncPeriod: 
                     - "-1"
                   vendor: 
@@ -317,7 +318,7 @@ spec:
                   trustEmail: 
                     - "false"
                   userObjectClasses: 
-                    - {{ include "class.users" . }}
+                    - {{ include "get_sso_config" (dict "key" "ldap_users_class" "context" $) }}
                   rdnLDAPAttribute: 
                     - uid
                   editMode: 
@@ -327,7 +328,7 @@ spec:
                   batchSizeForSync: 
                     - "1000"
           groups: 
-            - name: {{ .Values.admin.group | quote }}
+            - name: {{ include "get_sso_config" (dict "key" "admin_group" "context" $) }}
               realmRoles: 
                 - admin
           identityProviders:
@@ -344,11 +345,11 @@ spec:
                 clientId: admin-oidc
                 clientAuthMethod: client_secret_post
                 clientSecret: ""
-                tokenUrl: {{ include "urls.admin_oidc_token" . }}
-                authorizationUrl: {{ include "urls.admin_oidc_auth" . }}
+                tokenUrl: {{ include "urls.dex_oidc_token" . }}
+                authorizationUrl: {{ include "urls.dex_oidc_auth" . }}
                 validateSignature: "true"
                 useJwksUrl: "true"
-                jwksUrl: {{ include "urls.admin_oidc_jwks" . }}
+                jwksUrl: {{ include "urls.dex_oidc_jwks" . }}
                 syncMode: FORCE
                 defaultScope: "email groups profile openid"
                 guiOrder: 0
@@ -392,7 +393,7 @@ spec:
               clientAuthenticatorType: client-secret
               secret: ""
               redirectUris: 
-                - {{ include "urls.authproxy_callback" . }}
+                - {{ .Values.urls.authproxy_callback }}
               webOrigins: 
                 - "*"
               optionalClientScopes:

@@ -11,28 +11,6 @@
 {{- define "urls.idp_saml_entrypoint" -}}
 {{ printf "%s/protocol/saml" (include "urls.idp" .) }}
 {{- end -}}
-{{- define "urls.idp_oidc_callback" -}}
-{{ printf "%s/broker/admin-oidc/endpoint" (include "urls.idp" .) }}
-{{- end -}}
-
-{{- define "hosts.admin_oidc" -}}
-{{ printf "%s.%s" .Values.subdomains.dex .Values.domain }}
-{{- end -}}
-{{- define "urls.admin_oidc_issuer" -}}
-{{ printf "https://%s" (include "hosts.admin_oidc" .) }}
-{{- end -}}
-{{- define "urls.admin_oidc_callback_external" -}}
-{{ printf "https://%s/callback" (include "hosts.admin_oidc" .) }}
-{{- end -}}
-{{- define "urls.admin_oidc_token" -}}
-{{ printf "https://%s/token" (include "hosts.admin_oidc" .) }}
-{{- end -}}
-{{- define "urls.admin_oidc_auth" -}}
-{{ printf "https://%s/auth" (include "hosts.admin_oidc" .) }}
-{{- end -}}
-{{- define "urls.admin_oidc_jwks" -}}
-{{ printf "https://%s/keys" (include "hosts.admin_oidc" .) }}
-{{- end -}}
 
 {{- define "hosts.authproxy" -}}
 {{ printf "%s.%s" .Values.subdomains.oauth2_proxy .Values.domain }}

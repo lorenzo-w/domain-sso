@@ -1,0 +1,11 @@
+ssoProviderNamespace: ""
+configSecretName: sso-config
+
+hosts:
+  keycloak: ""
+  dex: ""
+
+urls:
+  authproxy_callback: ""
+
+admin: {}
