@@ -100,9 +100,9 @@ spec:
                 subComponents: {}
                 config: 
                   privateKey:
-                    - {{ $idp_cert | index "tls.key" | quote }}
+                    - {{ index $idp_cert "tls.key" | quote }}
                   certificate:
-                    - {{ $idp_cert | index "tls.crt" | quote }} 
+                    - {{ index $idp_cert "tls.crt" | quote }} 
                   priority: ["100"] 
               - name: "aes-generated"
                 providerId: "aes-generated"
