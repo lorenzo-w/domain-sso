@@ -47,7 +47,7 @@ spec:
             {{- end }}
       staticClients:
         - id: admin-oidc
-          secret: ""
+          secret: {{ include "get_sso_config" (dict "key" "internal_oidc_client_secret" "context" $) }}
           name: "Admin OIDC"
           redirectURIs: 
             - {{ include "urls.keycloak_oidc_callback" . }}
