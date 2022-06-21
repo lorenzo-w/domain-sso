@@ -22,7 +22,7 @@ spec:
   values:
     config:
       clientID: authproxy-oidc
-      clientSecret: ""
+      clientSecret: {{ include "get_sso_config" (dict "key" "internal_oidc_client_secret" "context" $) }}
       cookieSecret: {{ randAlphaNum 32 }}
       configFile: |-
         upstreams = "file:///dev/null"
