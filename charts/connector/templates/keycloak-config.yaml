@@ -31,7 +31,7 @@ spec:
               description: "Internal OIDC client"
               enabled: true
               clientAuthenticatorType: client-secret
-              secret: {{ (lookup "v1" "Secret" .Release.Namespace $client.secretName).data.secret | b64dec | quote }}
+              secret: {{ (lookup "v1" "Secret" $.Release.Namespace $client.secretName).data.secret | b64dec | quote }}
               redirectUris: 
               {{ range $uri := $client.redirectURIs -}}
                 - {{ $uri }}
@@ -55,7 +55,7 @@ spec:
                 - "*"
               frontchannelLogout: true
               attributes:
-                {{ $secretData := (lookup "v1" "Secret" .Release.Namespace $client.certSecretName).data -}}
+                {{ $secretData := (lookup "v1" "Secret" $.Release.Namespace $client.certSecretName).data -}}
                 saml.signing.private.key: {{ index $secretData "tls.key" | b64dec | quote }}
                 saml.signing.certificate: {{ index $secretData "tls.crt" | b64dec | quote }}
                 saml.force.post.binding: "true"
