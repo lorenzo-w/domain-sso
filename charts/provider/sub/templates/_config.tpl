@@ -19,5 +19,5 @@
 {{- end -}}
 
 {{- define "urls.authproxy_callback" -}}
-{{ printf "https://%s/oauth2/callback" (include "hosts.authproxy" .) }}
+{{ printf "https://%s/oauth2/callback" .Values.hosts.oauth2_proxy }}
 {{- end -}}
