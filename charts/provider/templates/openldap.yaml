@@ -11,14 +11,21 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: helm-openldap
+  valuesFrom:
+    - kind: Secret
+      name: {{ .Values.configSecretName }}
+      valuesKey: ldap_admin_pw
+      targetPath: "global.adminPassword"
+    - kind: Secret
+      name: {{ .Values.configSecretName }}
+      valuesKey: ldap_admin_pw
+      targetPath: "global.configPassword"
   values:
     customTLS:
       enabled: false
     replicaCount: 1
     global:
       ldapDomain: {{ .Values.domain }}
-      adminPassword: {{ include "secrets.ldap_admin_pw" . }}
-      configPassword: {{ include "secrets.ldap_config_pw" . }}
     env:
       LDAP_ORGANISATION: {{ .Values.org.name | quote }}
     customFileSets:
@@ -38,19 +45,19 @@ spec:
               dn: {{ include "dn.roles" . }}
               objectClass: organizationalUnit
               ou: roles
-
     ltb-passwd:
       enabled: false
     phpldapadmin:
       env:
         PHPLDAPADMIN_HTTPS: "false"
       ingress:
+        {{ $phpldapadmin_host := printf "%s.%s" .Values.subdomains.phpldapadmin .Values.domain -}}
         enabled: true
         annotations:
           cert-manager.io/cluster-issuer: acme
         hosts:
-          - {{ include "hosts.phpldapadmin" . }}
+          - {{ $phpldapadmin_host }}
         tls:
           - hosts:
-              - {{ include "hosts.phpldapadmin" . }}
+              - {{ $phpldapadmin_host }}
             secretName: phpldapadmin-cert

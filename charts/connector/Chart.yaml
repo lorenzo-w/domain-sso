@@ -1,0 +1,10 @@
+apiVersion: v2
+name: domain-sso-connector
+description: Add OIDC or SAML clients to local domain-sso provider
+type: application
+version: "0.1.0"
+appVersion: "0.1.0"
+dependencies:
+  - name: common
+    version: "1.16.0"
+    repository: https://charts.bitnami.com/bitnami

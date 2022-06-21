@@ -1,0 +1,18 @@
+ssoProviderNamespace: ""
+configSecretName: sso-config
+
+clients:
+  oidc: []
+  #    - id: ""
+  #      redirectURIs:
+  #        - https://example.com/path
+  #      secret: ""
+  saml: []
+  #    - id: ""
+  #      redirectURIs:
+  #        - https://example.com/path
+  #      key: ""
+  #      crt: ""
+
+nameOverride: ""
+fullnameOverride: ""

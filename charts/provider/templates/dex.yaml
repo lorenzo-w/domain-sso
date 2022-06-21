@@ -11,6 +11,11 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: dex
+  valuesFrom:
+    - kind: Secret
+      name: {{ .Values.configSecretName }}
+      valuesKey: internal_oidc_client_secret
+      targetPath: "config.staticClients[0].secret"
   values:
     envVars:
       - name: IDP_CLIENT_ID
@@ -46,11 +51,12 @@ spec:
               - groups
             {{- end }}
       staticClients:
-        - id: {{ include "names.admin_oidc_client" . }}
-          secret: {{ include "secrets.admin_oidc_client" . }}
+        - id: {{ include "names.internal_oidc_client" . }}
+          secret: ""
           name: "Admin OIDC"
           redirectURIs: 
-            - {{ include "urls.admin_oidc_callback_internal" . }}
+            - {{ include "urls.idp_oidc_callback" . }}
+            - {{ include "urls.authproxy_callback" . }}
     ingress:
       enabled: true
       annotations:

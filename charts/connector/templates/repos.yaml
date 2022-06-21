@@ -1,0 +1,7 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: jkroepke
+spec:
+  interval: 10m
+  url: https://jkroepke.github.io/helm-charts/

@@ -11,8 +11,7 @@
 {{- define "urls.idp_saml_entrypoint" -}}
 {{ printf "%s/protocol/saml" (include "urls.idp" .) }}
 {{- end -}}
-
-{{- define "urls.admin_oidc_callback_internal" -}}
+{{- define "urls.idp_oidc_callback" -}}
 {{ printf "%s/broker/admin-oidc/endpoint" (include "urls.idp" .) }}
 {{- end -}}
 
@@ -52,45 +51,14 @@
 {{ printf "%s.%s" .Values.subdomains.phpldapadmin .Values.domain }}
 {{- end -}}
 
-{{- define "names.oidc_client" -}}
-{{ "local-oidc" }}
+{{- define "names.internal_oidc_client" -}}
+local-admin-oidc
 {{- end -}}
-{{- define "secrets.oidc_client" -}}
-{{ derivePassword 1 "maximum" .Values.secretSeed "local-oidc-client" .Values.domain | b64enc }}
-{{- end -}}
-
-{{- define "names.admin_oidc_client" -}}
-{{ "local-admin-oidc" }}
-{{- end -}}
-{{- define "secrets.admin_oidc_client" -}}
-{{ derivePassword 1 "maximum" .Values.secretSeed "admin-oidc-client" .Values.domain | b64enc }}
-{{- end -}}
-
-{{- define "names.saml_client" -}}
-{{ "local-saml" }}
-{{- end -}}
-
 {{- define "names.ldap_admin_dn" -}}
 {{ printf "cn=admin,dc=%s" (.Values.domain | splitList "." | join ",dc=") | quote }}
 {{- end -}}
-{{- define "secrets.ldap_admin_pw" -}}
-{{ derivePassword 1 "maximum" .Values.secretSeed "openldap-admin" .Values.domain | b64enc }}
-{{- end -}}
-{{- define "secrets.ldap_config_pw" -}}
-{{ derivePassword 1 "maximum" .Values.secretSeed "openldap-config" .Values.domain | b64enc }}
-{{- end -}}
-
 {{- define "names.keycloak_admin_user" -}}
-{{ "admin" }}
-{{- end -}}
-{{- define "secrets.keycloak_admin_pw" -}}
-{{ derivePassword 1 "maximum" .Values.secretSeed "keycloak-admin" .Values.domain | b64enc }}
-{{- end -}}
-{{- define "names.keycloak_management_user" -}}
-{{ "admin" }}
-{{- end -}}
-{{- define "secrets.keycloak_management_pw" -}}
-{{ derivePassword 1 "maximum" .Values.secretSeed "keycloak-management" .Values.domain | b64enc }}
+admin
 {{- end -}}
 
 {{- define "dn.base" -}}
@@ -124,28 +92,18 @@ metadata:
 type: Opaque
 data:
   idp_url: {{ include "urls.idp" . | b64enc }}
-  {{ $idp_id := genSelfSignedCert .Values.domain nil nil 3650 -}}
-  idp_crt: {{ $idp_id.Cert | b64enc }}
-  idp_key: {{ $idp_id.Key | b64enc }}
+  idp_cert_secret: idp-cert
 
   admin_group: {{ .Values.admin.group | b64enc }}
 
   oidc_issuer_url: {{ include "urls.idp" .  | b64enc }}
-  oidc_client_id: {{ include "names.oidc_client" .  | b64enc }}
-  oidc_client_secret: {{ include "secrets.oidc_client" .  | b64enc }}
-
   saml_entrypoint_url: {{ include "urls.idp_saml_entrypoint" . | b64enc }}
-  saml_client_name: {{ include "names.saml_client" . | b64enc }}
-  {{ $saml_client_id := genSelfSignedCert .Values.domain nil nil 3650 -}}
-  saml_client_crt: {{ $saml_client_id.Cert | b64enc }}
-  saml_client_key: {{ $saml_client_id.Key | b64enc }}
 
   ldap_host: {{ printf "openldap.%s.svc.cluster.local" .Release.Namespace | b64enc }}
   ldap_port: {{ "389" | b64enc }}
   ldap_base_dn: {{ include "dn.base" . | b64enc }}
   ldap_admin_dn: {{ include "names.ldap_admin_dn" . | b64enc }}
-  ldap_admin_pw: {{ include "secrets.ldap_admin_pw" . | b64enc }}
-  ldap_config_pw: {{ include "secrets.ldap_config_pw" . | b64enc }}
+  ldap_admin_pw: {{ include "common.secrets.passwords.manage" (dict "secret" .Values.configSecretName "key" "ldap_admin_pw" "providedValues" (list "admin.password") "context" $) | b64enc }}
   ldap_users_dn: {{ include "dn.users" . | b64enc }}
   ldap_groups_dn: {{ include "dn.groups" . | b64enc }}
   ldap_roles_dn: {{ include "dn.roles" . | b64enc }}
@@ -156,5 +114,11 @@ data:
   authproxy_login_url: {{ include "urls.authproxy_login" . | b64enc }}
   authproxy_check_url: {{ include "urls.authproxy_check" . | b64enc }}
   authproxy_callback_url: {{ include "urls.authproxy_callback" . | b64enc }}
----
+
+  keycloak_url: {{ include "urls.keycloak" . | b64enc }}
+  keycloak_admin_user: {{ include "names.keycloak_admin_user" . | b64enc }}
+  keycloak_admin_pw: {{ include "common.secrets.passwords.manage" (dict "secret" .Values.configSecretName "key" "keycloak_admin_pw" "providedValues" (list "") "context" $) | b64enc }}
+
+  internal_oidc_client_id: {{ include "names.internal_oidc_client" . | b64enc }}
+  internal_oidc_client_secret: {{ include "common.secrets.passwords.manage" (dict "secret" .Values.configSecretName "key" "internal_oidc_client_secret" "providedValues" (list "") "context" $) | b64enc }}
 {{- end -}}

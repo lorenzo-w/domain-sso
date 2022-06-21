@@ -13,10 +13,15 @@ spec:
         name: oauth2-proxy
   dependsOn:
     - name: keycloak-config
+  valuesFrom:
+    - kind: Secret
+      name: {{ .Values.configSecretName }}
+      valuesKey: internal_oidc_client_secret
+      targetPath: "config.clientSecret"
   values:
     config:
       clientID: {{ include "names.oidc_client" . }}
-      clientSecret: {{ include "secrets.oidc_client" . }}
+      clientSecret: ""
       cookieSecret: {{ randAlphaNum 32 }}
       configFile: |-
         upstreams = "file:///dev/null"

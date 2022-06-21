@@ -1,5 +1,3 @@
-secretSeed: "" # Please supply a generated secret unique to this cluster (and save it externally for backup)
-
 admin:
   idp:
     # See https://dexidp.io/docs/connectors/

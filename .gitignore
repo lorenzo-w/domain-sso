@@ -1,5 +1,4 @@
 .env
-/values.local.yaml
+/values.yaml
 /rendered
 /kubeconfig
-/charts

@@ -1,0 +1,71 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: {{ include "common.names.fullname" . }}
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: keycloak-config-cli
+      version: '1.2.3'
+      sourceRef:
+        kind: HelmRepository
+        name: jkroepke
+  values:
+    image:
+      tag: "5.2.0-18.0.0"
+    env: 
+      KEYCLOAK_URL: {{ include "get_sso_config" (dict "key" "keycloak_url" "context" $) }}
+      KEYCLOAK_USER: {{ include "get_sso_config" (dict "key" "keycloak_admin_user" "context" $) }}
+      IMPORT_FILES_LOCATIONS: "/config/master.json"
+      IMPORT_MANAGED_CLIENTS: "no-delete" # Do not delete existing clients, just add new ones
+    secrets:
+      KEYCLOAK_PASSWORD: {{ include "get_sso_config" (dict "key" "keycloak_admin_pw" "context" $) }}
+    config: 
+      master:
+        inline:
+          clients: 
+            {{ range $client := .Values.clients.oidc -}}
+            - clientId: {{ $client.id }}
+              name: {{ $client.id }}
+              description: "Internal OIDC client"
+              enabled: true
+              clientAuthenticatorType: client-secret
+              secret: {{ $client.secret | quote }}
+              redirectUris: 
+              {{ range $uri := $client.redirectURIs -}}
+                - {{ $uri }}
+              {{ end -}}
+              webOrigins: 
+                - "*"
+              optionalClientScopes:
+                - groups
+            {{ end -}}
+            {{ range $client := .Values.clients.saml -}}
+            - clientId: {{ $client.id }}
+              protocol: saml
+              name: {{ $client.id }}
+              description: "Internal SAML client"
+              enabled: true
+              redirectUris: 
+              {{ range $uri := $client.redirectURIs -}}
+                - {{ $uri }}
+              {{ end -}}
+              webOrigins: 
+                - "*"
+              frontchannelLogout: true
+              attributes:
+                saml.force.post.binding: "true"
+                saml.signing.certificate: {{ $client.crt | quote }}
+                saml.signature.algorithm: RSA_SHA256
+                saml_name_id_format: email
+                saml.signing.private.key: {{ $client.key | quote }}
+              protocolMappers:
+                - name: firstName
+                  protocol: saml
+                  protocolMapper: saml-user-attribute-mapper
+                  config:
+                    attribute.nameformat: Basic
+                    user.attribute: firstName
+                    attribute.name: cn
+            {{ end -}}

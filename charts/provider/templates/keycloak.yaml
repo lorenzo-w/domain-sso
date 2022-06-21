@@ -1,3 +1,20 @@
+{{- if not (include "common.secrets.exists" (dict "secret" "idp-cert" "context" $)) -}}
+{{- $gen_cert := genSelfSignedCert .Values.domain nil nil 3650 -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: idp-cert
+type: kubernetes.io/tls
+data:
+  tls.crt: |
+    {{ $gen_cert.Cert | b64enc }}
+  tls.key: |
+    {{ $gen_cert.Key | b64enc }}
+{{- $idp_cert := dict "tls.crt" $gen_cert.Cert "tls.key" $gen_cert.Key "idp-cert" "context" $ }}
+{{- else -}}
+{{- $idp_cert := (lookup "v1" "Secret" .Release.Namespace "idp-cert").data -}}
+{{- end -}}
+---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
@@ -13,12 +30,27 @@ spec:
         name: bitnami
   dependsOn:
     - name: openldap
+  valuesFrom:
+    - kind: Secret
+      name: {{ .Values.configSecretName }}
+      valuesKey: keycloak_admin_pw
+      targetPath: "auth.adminPassword"
+    - kind: Secret
+      name: {{ .Values.configSecretName }}
+      valuesKey: keycloak_admin_pw
+      targetPath: "auth.managementPassword"
+    - kind: Secret
+      name: {{ .Values.configSecretName }}
+      valuesKey: internal_oidc_client_secret
+      targetPath: "config.master.inline.identityProviders[0].config.clientSecret"
+    - kind: Secret
+      name: {{ .Values.configSecretName }}
+      valuesKey: internal_oidc_client_secret
+      targetPath: "config.master.inline.clients[0].secret"
   values:
     auth:
-      adminUser: {{ include "names.keycloak_admin_user" . }}
-      adminPassword: {{ include "secrets.keycloak_admin_pw" . }}
-      managementUser: {{ include "names.keycloak_management_user" . }}
-      managementPassword: {{ include "secrets.keycloak_management_pw" . }}
+      adminUser: {{ include "names.keycloak_admin_user" . | quote }}
+      managementUser: {{ include "names.keycloak_admin_user" . | quote }}
     ingress:
       enabled: true
       annotations:
@@ -43,15 +75,18 @@ spec:
         name: jkroepke
   dependsOn:
     - name: keycloak
+  valuesFrom:
+    - kind: Secret
+      name: {{ .Values.configSecretName }}
+      valuesKey: keycloak_admin_pw
+      targetPath: "secrets.KEYCLOAK_PASSWORD"
   values:
     image:
       tag: "5.2.0-18.0.0"
     env: 
       KEYCLOAK_URL: {{ include "urls.keycloak" . }}
-      KEYCLOAK_USER: {{ include "names.keycloak_admin_user" . }}
+      KEYCLOAK_USER: {{ include "names.keycloak_admin_user" . | quote }}
       IMPORT_FILES_LOCATIONS: "/config/master.json"
-    secrets:
-      KEYCLOAK_PASSWORD: {{ include "secrets.keycloak_admin_pw" . }}
     config: 
       master:
         inline:
@@ -63,8 +98,10 @@ spec:
                 providerId: "rsa-generated"
                 subComponents: {}
                 config: 
-                  privateKey: [""]
-                  certificate: [""] 
+                  privateKey:
+                    - {{ $idp_cert | index "tls.key" | quote }}
+                  certificate:
+                    - {{ $idp_cert | index "tls.crt" | quote }} 
                   priority: ["100"] 
               - name: "aes-generated"
                 providerId: "aes-generated"
@@ -177,9 +214,9 @@ spec:
                         group.name.ldap.attribute:
                           - cn
                         group.object.classes:
-                          - {{ include "class.groups" . }}
+                          - {{ include "get_sso_config" (dict "key" "ldap_groups_class" "context" $) }}
                         groups.dn:
-                          - {{ include "dn.groups" . }}
+                          - {{ include "get_sso_config" (dict "key" "ldap_groups_dn" "context" $) }}
                         groups.ldap.filter: []
                         groups.path:
                           - /
@@ -207,9 +244,9 @@ spec:
                         role.name.ldap.attribute:
                           - cn
                         role.object.classes:
-                          - {{ include "class.roles" . }}
+                          - {{ include "get_sso_config" (dict "key" "ldap_roles_class" "context" $) }}
                         roles.dn:
-                          - {{ include "dn.roles" . }}
+                          - {{ include "get_sso_config" (dict "key" "ldap_roles_dn" "context" $) }}
                         roles.ldap.filter: []
                         memberof.ldap.attribute:
                           - memberOf
@@ -233,7 +270,7 @@ spec:
                   connectionPooling: 
                     - "true"
                   usersDn:
-                    - {{ include "dn.users" . }}
+                    - {{ include "get_sso_config" (dict "key" "ldap_users_dn" "context" $) }}
                   cachePolicy: 
                     - DEFAULT
                   useKerberosForPasswordAuthentication: 
@@ -245,9 +282,9 @@ spec:
                   usernameLDAPAttribute: 
                     - uid
                   bindDn: 
-                    - {{ include "names.ldap_admin_dn" . }}
+                    - {{ include "get_sso_config" (dict "key" "ldap_admin_dn" "context" $) }}
                   bindCredential: 
-                    - {{ include "secrets.ldap_admin_pw" . | quote }}
+                    - {{ include "get_sso_config" (dict "key" "ldap_admin_pw" "context" $) }}
                   changedSyncPeriod: 
                     - "-1"
                   vendor: 
@@ -299,7 +336,7 @@ spec:
               config:
                 clientId: {{ include "names.admin_oidc_client" . }}
                 clientAuthMethod: client_secret_post
-                clientSecret: {{ include "secrets.admin_oidc_client" . }}
+                clientSecret: ""
                 tokenUrl: {{ include "urls.admin_oidc_token" . }}
                 authorizationUrl: {{ include "urls.admin_oidc_auth" . }}
                 validateSignature: "true"
@@ -324,55 +361,34 @@ spec:
                 claims: {{ printf "[{\"key\": \"groups\",\"value\": %s}]" (.Values.admin.group | quote) | quote }}
                 group: {{ .Values.admin.group | quote }}
                 # syncMode: FORCE
-          clients: 
-            - clientId: {{ include "names.oidc_client" . | quote }}
-              name: {{ printf "%s-oidc-client" .Values.domain }}
-              description: {{ printf "SSO for %s" .Values.domain | quote }}
+          clientScopes:
+            - name: groups
+              protocol: openid-connect
+              attributes:
+                display.on.consent.screen: "true"
+                include.in.token.scope": "true"
+              protocolMappers:
+                - name: groups
+                  protocol: openid-connect
+                  protocolMapper: oidc-group-membership-mapper
+                  config: 
+                    full.path: "false"
+                    id.token.claim: "true"
+                    access.token.claim: "true"
+                    userinfo.token.claim: "true"
+                    claim.name: groups
+          clients:
+            - clientId: internal-oidc
+              name: internal-oidc
+              description: "Internal OIDC client"
               enabled: true
               clientAuthenticatorType: client-secret
-              secret: {{ include "secrets.oidc_client" . | quote }}
+              secret: ""
               redirectUris: 
-                - {{ printf "https://*.%s/*" .Values.domain }}
+              {{ range $uri := $client.redirectURIs -}}
+                - {{ $uri }}
+              {{ end -}}
               webOrigins: 
-                - {{ printf "https://*.%s/*" .Values.domain }}
-            - clientId: {{ include "names.saml_client" . | quote }}
-              name: {{ printf "%s-saml-client" .Values.domain }}
-              description: {{ printf "SSO for %s" .Values.domain | quote }}
-              enabled: true
-              redirectUris: 
-                - {{ printf "https://*.%s/*" .Values.domain }}
-              webOrigins: 
-                - {{ printf "https://*.%s/*" .Values.domain }}
-              frontchannelLogout: true
-              protocol: saml
-              attributes:
-                saml.force.post.binding: "true"
-                saml.signing.certificate: ""
-                saml.signature.algorithm: RSA_SHA256
-                saml_name_id_format: email
-                saml.signing.private.key: ""
-              protocolMappers:
-                - name: firstName
-                  protocol: saml
-                  protocolMapper: saml-user-attribute-mapper
-                  config:
-                    attribute.nameformat: Basic
-                    user.attribute: firstName
-                    attribute.name: cn
-  valuesFrom:
-    - kind: Secret
-      name: {{ .Values.configSecretName }}
-      valuesKey: idp_crt
-      targetPath: "config.master.inline.components.org\\.keycloak\\.keys\\.KeyProvider[0].config.certificate[0]"
-    - kind: Secret
-      name: {{ .Values.configSecretName }}
-      valuesKey: idp_key
-      targetPath: "config.master.inline.components.org\\.keycloak\\.keys\\.KeyProvider[0].config.privateKey[0]"
-    - kind: Secret
-      name: {{ .Values.configSecretName }}
-      valuesKey: saml_client_crt
-      targetPath: "config.master.inline.clients[1].attributes.saml\\.signing\\.certificate"
-    - kind: Secret
-      name: {{ .Values.configSecretName }}
-      valuesKey: saml_client_key
-      targetPath: "config.master.inline.clients[1].attributes.saml\\.signing\\.private\\.key"
+                - "*"
+              optionalClientScopes:
+                - groups
