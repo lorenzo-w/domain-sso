@@ -13,6 +13,7 @@ spec:
         name: oauth2-proxy
   dependsOn:
     - name: sso-provider-sub
+    - name: keycloak-config
   valuesFrom:
     - kind: Secret
       name: {{ .Values.configSecretName }}
