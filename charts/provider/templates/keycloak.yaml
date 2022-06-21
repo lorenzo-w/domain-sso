@@ -76,7 +76,7 @@ spec:
     - kind: Secret
       name: {{ .Values.configSecretName }}
       valuesKey: ldap_admin_pw
-      targetPath: "config.master.inline.components.org\.keycloak\.storage\.UserStorageProvider[0].config.bindCredential[0]"
+      targetPath: "config.master.inline.components.org\\.keycloak\\.storage\\.UserStorageProvider[0].config.bindCredential[0]"
     - kind: Secret
       name: {{ .Values.configSecretName }}
       valuesKey: internal_oidc_client_secret
