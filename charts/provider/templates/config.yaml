@@ -85,7 +85,7 @@ metadata:
 type: Opaque
 data:
   idp_url: {{ include "urls.idp" . | b64enc }}
-  idp_cert_secret: idp-cert
+  idp_cert_secret: {{ "idp-cert" | b64enc }}
 
   admin_group: {{ .Values.admin.group | b64enc }}
 
@@ -109,7 +109,7 @@ data:
   authproxy_callback_url: {{ include "urls.authproxy_callback" . | b64enc }}
 
   keycloak_url: {{ include "urls.keycloak" . | b64enc }}
-  keycloak_admin_user: admin
+  keycloak_admin_user: {{ "admin" | b64enc }}
   keycloak_admin_pw: {{ include "common.secrets.passwords.manage" (dict "secret" .Values.configSecretName "key" "keycloak_admin_pw" "providedValues" (list "") "context" $) | b64enc }}
 
   internal_oidc_client_secret: {{ include "common.secrets.passwords.manage" (dict "secret" .Values.configSecretName "key" "internal_oidc_client_secret" "providedValues" (list "") "context" $) | b64enc }}

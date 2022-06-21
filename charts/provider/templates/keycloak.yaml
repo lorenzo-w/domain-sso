@@ -9,9 +9,9 @@ metadata:
 type: kubernetes.io/tls
 data:
   tls.crt: |
-    {{ $gen_cert.Cert | b64enc }}
+    {{ $gen_cert.Cert }}
   tls.key: |
-    {{ $gen_cert.Key | b64enc }}
+    {{ $gen_cert.Key }}
 ---
 {{- $idp_cert = dict "tls.crt" $gen_cert.Cert "tls.key" $gen_cert.Key }}
 {{- else -}}
