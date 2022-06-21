@@ -12,13 +12,7 @@ spec:
         kind: HelmRepository
         name: oauth2-proxy
   dependsOn:
-    - name: sso-provider-sub
     - name: keycloak-config
-  valuesFrom:
-    - kind: Secret
-      name: {{ .Values.configSecretName }}
-      valuesKey: internal_oidc_client_secret
-      targetPath: "config.clientSecret"
   values:
     config:
       clientID: authproxy-oidc
@@ -29,7 +23,7 @@ spec:
         whitelist_domains = [ {{ printf ".%s" .Values.domain | quote }} ]
         provider = "oidc"
         provider_display_name = {{ printf "SSO for %s" .Values.domain | quote }}
-        oidc_issuer_url = {{ include "urls.idp" . | quote }}
+        oidc_issuer_url = {{ include "get_sso_config" (dict "key" "oidc_issuer_url" "context" $) | quote }}
         redirect_url = {{ include "urls.authproxy_callback" . | quote }}
         set_xauthrequest = true
         set_authorization_header = true
@@ -47,8 +41,8 @@ spec:
       annotations:
         cert-manager.io/cluster-issuer: acme
       hosts:
-        - {{ include "hosts.authproxy" . }}
+        - {{ .Values.hosts.oauth2_proxy }}
       tls:
         - hosts:
-            - {{ include "hosts.authproxy" . }}
+            - {{ .Values.hosts.oauth2_proxy }}
           secretName: oauth2-proxy-cert

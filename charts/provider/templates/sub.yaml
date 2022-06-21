@@ -17,7 +17,6 @@ spec:
     hosts:
       keycloak: {{ include "hosts.keycloak" . }}
       dex: {{ printf "%s.%s" .Values.subdomains.dex .Values.domain }}
-    urls:
-      authproxy_callback: {{ include "urls.authproxy_callback" . }}
+      oauth2_proxy: {{ include "hosts.authproxy" . }}
     admin: {{ .Values.admin | toYaml | nindent 6 }}
     domain: {{ .Values.domain }}

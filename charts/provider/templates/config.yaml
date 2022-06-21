@@ -21,9 +21,6 @@
 {{- define "urls.authproxy_check" -}}
 {{ printf "http://oauth2-proxy.%s.svc.cluster.local/oauth2/auth" .Release.Namespace }}
 {{- end -}}
-{{- define "urls.authproxy_callback" -}}
-{{ printf "https://%s/oauth2/callback" (include "hosts.authproxy" .) }}
-{{- end -}}
 
 {{- define "hosts.phpldapadmin" -}}
 {{ printf "%s.%s" .Values.subdomains.phpldapadmin .Values.domain }}
@@ -83,7 +80,6 @@ data:
 
   authproxy_login_url: {{ include "urls.authproxy_login" . | b64enc }}
   authproxy_check_url: {{ include "urls.authproxy_check" . | b64enc }}
-  authproxy_callback_url: {{ include "urls.authproxy_callback" . | b64enc }}
 
   keycloak_url: {{ include "urls.keycloak" . | b64enc }}
   keycloak_admin_user: {{ "admin" | b64enc }}

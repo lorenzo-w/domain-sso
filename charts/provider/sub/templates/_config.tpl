@@ -17,3 +17,7 @@
 {{- define "urls.keycloak_oidc_callback" -}}
 {{ printf "https://%s/realms/master/broker/admin-oidc/endpoint" .Values.hosts.keycloak }}
 {{- end -}}
+
+{{- define "urls.authproxy_callback" -}}
+{{ printf "https://%s/oauth2/callback" (include "hosts.authproxy" .) }}
+{{- end -}}

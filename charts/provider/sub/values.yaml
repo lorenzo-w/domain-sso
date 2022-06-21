@@ -3,9 +3,7 @@ configSecretName: sso-config
 hosts:
   keycloak: ""
   dex: ""
-
-urls:
-  authproxy_callback: ""
+  oauth2_proxy: ""
 
 domain: ""
 
