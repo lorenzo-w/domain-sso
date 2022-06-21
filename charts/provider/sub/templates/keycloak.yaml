@@ -342,7 +342,7 @@ spec:
               config:
                 clientId: admin-oidc
                 clientAuthMethod: client_secret_post
-                clientSecret: ""
+                clientSecret: {{ include "get_sso_config" (dict "key" "internal_oidc_client_secret" "context" $) }}
                 tokenUrl: {{ include "urls.dex_oidc_token" . }}
                 authorizationUrl: {{ include "urls.dex_oidc_auth" . }}
                 validateSignature: "true"
@@ -394,5 +394,9 @@ spec:
                 - {{ include "urls.authproxy_callback" . }}
               webOrigins: 
                 - "*"
+              defaultClientScopes:
+                - email
+                - profile
               optionalClientScopes:
                 - groups
+                - roles
