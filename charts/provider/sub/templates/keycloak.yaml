@@ -391,7 +391,7 @@ spec:
               clientAuthenticatorType: client-secret
               secret: ""
               redirectUris: 
-                - {{ .Values.urls.authproxy_callback }}
+                - {{ include "urls.authproxy_callback" . }}
               webOrigins: 
                 - "*"
               optionalClientScopes:
