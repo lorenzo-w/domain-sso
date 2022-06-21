@@ -11,7 +11,7 @@ Params:
   {{- $secret := (lookup "v1" "Secret" .context.Release.Namespace .context.Values.configSecretName) }}
   {{- if $secret }}
     {{- if hasKey $secret.data .key }}
-      {{- index $secret.data .key -}}
+      {{- index $secret.data .key | b64dec -}}
     {{- else }}
       {{- printf "\nERROR: The SSO secret does not contain the key \"%s\"\n" .key | fail -}}
     {{- end -}}
