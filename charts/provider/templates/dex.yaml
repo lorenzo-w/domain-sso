@@ -51,12 +51,11 @@ spec:
               - groups
             {{- end }}
       staticClients:
-        - id: {{ include "names.internal_oidc_client" . }}
+        - id: admin-oidc
           secret: ""
           name: "Admin OIDC"
           redirectURIs: 
             - {{ include "urls.idp_oidc_callback" . }}
-            - {{ include "urls.authproxy_callback" . }}
     ingress:
       enabled: true
       annotations:

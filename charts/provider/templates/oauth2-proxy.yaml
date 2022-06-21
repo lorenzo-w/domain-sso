@@ -20,7 +20,7 @@ spec:
       targetPath: "config.clientSecret"
   values:
     config:
-      clientID: {{ include "names.oidc_client" . }}
+      clientID: authproxy-oidc
       clientSecret: ""
       cookieSecret: {{ randAlphaNum 32 }}
       configFile: |-
@@ -38,9 +38,6 @@ spec:
         cookie_domains = [ {{ printf ".%s" .Values.domain | quote }} ]
         email_domains = "*"
         scope = "email groups profile openid"
-        {{ if .Values.test_run -}}
-        ssl_insecure_skip_verify = true
-        {{- end }}
     # -> see https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview#config-file
     # and https://dexidp.io/docs/custom-scopes-claims-clients/#scopes
     # and https://dexidp.io/docs/custom-scopes-claims-clients/#cross-client-trust-and-authorized-party

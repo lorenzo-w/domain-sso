@@ -335,7 +335,7 @@ spec:
               # authenticateByDefault: false
               # linkOnly: false
               config:
-                clientId: {{ include "names.admin_oidc_client" . }}
+                clientId: admin-oidc
                 clientAuthMethod: client_secret_post
                 clientSecret: ""
                 tokenUrl: {{ include "urls.admin_oidc_token" . }}
@@ -379,16 +379,14 @@ spec:
                     userinfo.token.claim: "true"
                     claim.name: groups
           clients:
-            - clientId: internal-oidc
-              name: internal-oidc
+            - clientId: authproxy-oidc
+              name: authproxy-oidc
               description: "Internal OIDC client"
               enabled: true
               clientAuthenticatorType: client-secret
               secret: ""
               redirectUris: 
-              {{ range $uri := $client.redirectURIs -}}
-                - {{ $uri }}
-              {{ end -}}
+                - {{ include "urls.authproxy_callback" . }}
               webOrigins: 
                 - "*"
               optionalClientScopes:
