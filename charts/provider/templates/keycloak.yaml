@@ -40,18 +40,10 @@ spec:
       name: {{ .Values.configSecretName }}
       valuesKey: keycloak_admin_pw
       targetPath: "auth.managementPassword"
-    - kind: Secret
-      name: {{ .Values.configSecretName }}
-      valuesKey: internal_oidc_client_secret
-      targetPath: "config.master.inline.identityProviders[0].config.clientSecret"
-    - kind: Secret
-      name: {{ .Values.configSecretName }}
-      valuesKey: internal_oidc_client_secret
-      targetPath: "config.master.inline.clients[0].secret"
   values:
     auth:
-      adminUser: {{ include "names.keycloak_admin_user" . | quote }}
-      managementUser: {{ include "names.keycloak_admin_user" . | quote }}
+      adminUser: admin
+      managementUser: admin
     ingress:
       enabled: true
       annotations:
@@ -81,12 +73,24 @@ spec:
       name: {{ .Values.configSecretName }}
       valuesKey: keycloak_admin_pw
       targetPath: "secrets.KEYCLOAK_PASSWORD"
+    - kind: Secret
+      name: {{ .Values.configSecretName }}
+      valuesKey: ldap_admin_pw
+      targetPath: "config.master.inline.components.org\.keycloak\.storage\.UserStorageProvider[0].config.bindCredential[0]"
+    - kind: Secret
+      name: {{ .Values.configSecretName }}
+      valuesKey: internal_oidc_client_secret
+      targetPath: "config.master.inline.identityProviders[0].config.clientSecret"
+    - kind: Secret
+      name: {{ .Values.configSecretName }}
+      valuesKey: internal_oidc_client_secret
+      targetPath: "config.master.inline.clients[0].secret"
   values:
     image:
       tag: "5.2.0-18.0.0"
     env: 
       KEYCLOAK_URL: {{ include "urls.keycloak" . }}
-      KEYCLOAK_USER: {{ include "names.keycloak_admin_user" . | quote }}
+      KEYCLOAK_USER: admin
       IMPORT_FILES_LOCATIONS: "/config/master.json"
     config: 
       master:
@@ -215,9 +219,9 @@ spec:
                         group.name.ldap.attribute:
                           - cn
                         group.object.classes:
-                          - {{ include "get_sso_config" (dict "key" "ldap_groups_class" "context" $) }}
+                          - {{ include "class.groups" . }}
                         groups.dn:
-                          - {{ include "get_sso_config" (dict "key" "ldap_groups_dn" "context" $) }}
+                          - {{ include "dn.groups" . }}
                         groups.ldap.filter: []
                         groups.path:
                           - /
@@ -245,9 +249,9 @@ spec:
                         role.name.ldap.attribute:
                           - cn
                         role.object.classes:
-                          - {{ include "get_sso_config" (dict "key" "ldap_roles_class" "context" $) }}
+                          - {{ include "class.roles" . }}
                         roles.dn:
-                          - {{ include "get_sso_config" (dict "key" "ldap_roles_dn" "context" $) }}
+                          - {{ include "dn.roles" . }}
                         roles.ldap.filter: []
                         memberof.ldap.attribute:
                           - memberOf
@@ -271,7 +275,7 @@ spec:
                   connectionPooling: 
                     - "true"
                   usersDn:
-                    - {{ include "get_sso_config" (dict "key" "ldap_users_dn" "context" $) }}
+                    - {{ include "dn.users" . }}
                   cachePolicy: 
                     - DEFAULT
                   useKerberosForPasswordAuthentication: 
@@ -283,9 +287,9 @@ spec:
                   usernameLDAPAttribute: 
                     - uid
                   bindDn: 
-                    - {{ include "get_sso_config" (dict "key" "ldap_admin_dn" "context" $) }}
+                    - {{ include "dn.admin" . }}
                   bindCredential: 
-                    - {{ include "get_sso_config" (dict "key" "ldap_admin_pw" "context" $) }}
+                    - ""
                   changedSyncPeriod: 
                     - "-1"
                   vendor: 

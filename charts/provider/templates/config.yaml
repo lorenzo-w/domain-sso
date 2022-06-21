@@ -51,16 +51,6 @@
 {{ printf "%s.%s" .Values.subdomains.phpldapadmin .Values.domain }}
 {{- end -}}
 
-{{- define "names.internal_oidc_client" -}}
-local-admin-oidc
-{{- end -}}
-{{- define "names.ldap_admin_dn" -}}
-{{ printf "cn=admin,dc=%s" (.Values.domain | splitList "." | join ",dc=") | quote }}
-{{- end -}}
-{{- define "names.keycloak_admin_user" -}}
-admin
-{{- end -}}
-
 {{- define "dn.base" -}}
 {{ printf "dc=%s" (.Values.domain | splitList "." | join ",dc=") }}
 {{- end -}}
@@ -72,6 +62,9 @@ admin
 {{- end -}}
 {{- define "dn.roles" -}}
 {{ printf "ou=roles,dc=%s" (.Values.domain | splitList "." | join ",dc=") }}
+{{- end -}}
+{{- define "dn.admin" -}}
+{{ printf "cn=admin,dc=%s" (.Values.domain | splitList "." | join ",dc=") | quote }}
 {{- end -}}
 
 {{- define "class.users" -}}
@@ -102,7 +95,7 @@ data:
   ldap_host: {{ printf "openldap.%s.svc.cluster.local" .Release.Namespace | b64enc }}
   ldap_port: {{ "389" | b64enc }}
   ldap_base_dn: {{ include "dn.base" . | b64enc }}
-  ldap_admin_dn: {{ include "names.ldap_admin_dn" . | b64enc }}
+  ldap_admin_dn: {{ include "dn.admin" . | b64enc }}
   ldap_admin_pw: {{ include "common.secrets.passwords.manage" (dict "secret" .Values.configSecretName "key" "ldap_admin_pw" "providedValues" (list "admin.password") "context" $) | b64enc }}
   ldap_users_dn: {{ include "dn.users" . | b64enc }}
   ldap_groups_dn: {{ include "dn.groups" . | b64enc }}
@@ -116,7 +109,7 @@ data:
   authproxy_callback_url: {{ include "urls.authproxy_callback" . | b64enc }}
 
   keycloak_url: {{ include "urls.keycloak" . | b64enc }}
-  keycloak_admin_user: {{ include "names.keycloak_admin_user" . | b64enc }}
+  keycloak_admin_user: admin
   keycloak_admin_pw: {{ include "common.secrets.passwords.manage" (dict "secret" .Values.configSecretName "key" "keycloak_admin_pw" "providedValues" (list "") "context" $) | b64enc }}
 
   internal_oidc_client_secret: {{ include "common.secrets.passwords.manage" (dict "secret" .Values.configSecretName "key" "internal_oidc_client_secret" "providedValues" (list "") "context" $) | b64enc }}
