@@ -389,7 +389,7 @@ spec:
               description: "Internal OIDC client"
               enabled: true
               clientAuthenticatorType: client-secret
-              secret: ""
+              secret: {{ include "get_sso_config" (dict "key" "internal_oidc_client_secret" "context" $) }}
               redirectUris: 
                 - {{ include "urls.authproxy_callback" . }}
               webOrigins: 
