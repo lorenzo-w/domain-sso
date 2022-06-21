@@ -6,13 +6,12 @@ clients:
   #    - id: ""
   #      redirectURIs:
   #        - https://example.com/path
-  #      secret: ""
+  #      secretName: ""
   saml: []
   #    - id: ""
   #      redirectURIs:
   #        - https://example.com/path
-  #      key: ""
-  #      crt: ""
+  #      certSecretName: ""
 
 nameOverride: ""
 fullnameOverride: ""
