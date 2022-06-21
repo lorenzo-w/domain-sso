@@ -73,13 +73,13 @@ spec:
                   priority: ["100"]
               - name: "rsa-enc-generated"
                 providerId: "rsa-enc-generated"
-                subComponents: 
+                subComponents: {}
                 config: 
                   priority: ["100"]
                   algorithm: ["RSA-OAEP"]
               - name: "hmac-generated"
                 providerId: "hmac-generated"
-                subComponents: 
+                subComponents: {}
                 config: 
                   priority: ["100"]
                   algorithm: ["HS256"]
