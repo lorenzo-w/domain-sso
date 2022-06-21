@@ -10,6 +10,8 @@ spec:
       sourceRef:
         kind: GitRepository
         name: self
+  dependsOn:
+    - name: openldap
   values:
     configSecretName: {{ .Values.configSecretName }}
     hosts:

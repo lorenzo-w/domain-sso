@@ -32,8 +32,6 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: bitnami
-  dependsOn:
-    - name: openldap
   valuesFrom:
     - kind: Secret
       name: {{ .Values.configSecretName }}

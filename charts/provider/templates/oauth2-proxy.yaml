@@ -12,7 +12,7 @@ spec:
         kind: HelmRepository
         name: oauth2-proxy
   dependsOn:
-    - name: keycloak-config
+    - name: sso-provider-sub
   valuesFrom:
     - kind: Secret
       name: {{ .Values.configSecretName }}
