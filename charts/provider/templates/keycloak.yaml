@@ -9,9 +9,9 @@ metadata:
 type: kubernetes.io/tls
 data:
   tls.crt: |
-    {{ $gen_cert.Cert }}
+    {{ $gen_cert.Cert | replace "\n" "" | trimPrefix "-----BEGIN CERTIFICATE-----" | trimSuffix "-----END CERTIFICATE-----" | b64enc }}
   tls.key: |
-    {{ $gen_cert.Key }}
+    {{ $gen_cert.Key | replace "\n" "" | trimPrefix "-----BEGIN RSA PRIVATE KEY-----" | trimSuffix "-----END RSA PRIVATE KEY-----" | b64enc }}
 ---
 {{- $idp_cert = dict "tls.crt" $gen_cert.Cert "tls.key" $gen_cert.Key }}
 {{- else -}}
