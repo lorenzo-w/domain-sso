@@ -19,7 +19,7 @@
 {{ printf "https://%s/oauth2/start" (include "hosts.authproxy" .) }}
 {{- end -}}
 {{- define "urls.authproxy_check" -}}
-{{ printf "http://oauth2-proxy.%s.svc.cluster.local/oauth2/auth" .Release.Namespace }}
+{{ printf "https://%s/oauth2/auth" (include "hosts.authproxy" .) }}
 {{- end -}}
 
 {{- define "hosts.phpldapadmin" -}}
