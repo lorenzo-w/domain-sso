@@ -387,14 +387,16 @@ spec:
                     userinfo.token.claim: "true"
                     claim.name: groups
           clients:
-            - clientId: authproxy-oidc
-              name: authproxy-oidc
+            - clientId: {{ include "get_sso_config" (dict "key" "internal_oidc_client_name" "context" $) }}
+              name: {{ include "get_sso_config" (dict "key" "internal_oidc_client_name" "context" $) }}
               description: "Internal OIDC client"
               enabled: true
               clientAuthenticatorType: client-secret
               secret: {{ include "get_sso_config" (dict "key" "internal_oidc_client_secret" "context" $) }}
               redirectUris: 
                 - {{ include "urls.authproxy_callback" . }}
+                - http://localhost:8000 # For kubelogin
+                - http://localhost:18000 # For kubelogin
               webOrigins: 
                 - "*"
               defaultClientScopes:
