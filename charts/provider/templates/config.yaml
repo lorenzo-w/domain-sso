@@ -85,5 +85,5 @@ data:
   keycloak_admin_user: {{ "admin" | b64enc }}
   keycloak_admin_pw: {{ include "common.secrets.passwords.manage" (dict "secret" .Values.configSecretName "key" "keycloak_admin_pw" "providedValues" (list "") "context" $) }}
 
-  internal_oidc_client_name: {{ "authproxy-oidc" | b64enc }}
+  internal_oidc_client_id: {{ "authproxy-oidc" | b64enc }}
   internal_oidc_client_secret: {{ include "common.secrets.passwords.manage" (dict "secret" .Values.configSecretName "key" "internal_oidc_client_secret" "providedValues" (list "") "context" $) }}
