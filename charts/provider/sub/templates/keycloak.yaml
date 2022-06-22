@@ -100,6 +100,13 @@ spec:
         inline:
           enabled: true
           realm: master
+          accessTokenLifespan: 600
+          accessTokenLifespanForImplicitFlow: 1200
+          ssoSessionIdleTimeout: 3600
+          ssoSessionMaxLifespan: 86400
+          ssoSessionIdleTimeoutRememberMe: 172800
+          ssoSessionMaxLifespanRememberMe: 2592000
+          offlineSessionIdleTimeout: 5184000
           components:
             org.keycloak.keys.KeyProvider:
               - name: "rsa-generated"

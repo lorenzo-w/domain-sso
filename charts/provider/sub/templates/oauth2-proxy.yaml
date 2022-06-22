@@ -31,8 +31,10 @@ spec:
         pass_access_token = true
         cookie_samesite = "none"
         cookie_domains = [ {{ printf ".%s" .Values.domain | quote }} ]
+        cookie_refresh = "300s"
         email_domains = "*"
         scope = "email groups profile openid"
+        allowed_groups = [ {{ include "get_sso_config" (dict "key" "admin_group" "context" $) | quote }} ]
     # -> see https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview#config-file
     # and https://dexidp.io/docs/custom-scopes-claims-clients/#scopes
     # and https://dexidp.io/docs/custom-scopes-claims-clients/#cross-client-trust-and-authorized-party
