@@ -93,7 +93,7 @@ spec:
       KEYCLOAK_URL: {{ printf "https://%s" .Values.hosts.keycloak }}
       KEYCLOAK_USER: admin
       IMPORT_FILES_LOCATIONS: "/config/master.json"
-      IMPORT_MANAGED_CLIENTS: "no-delete" # Do not delete existing clients, just add new ones
+      IMPORT_MANAGED_CLIENT: "no-delete" # Do not delete existing clients, just add new ones
       KEYCLOAK_AVAILABILITYCHECK_ENABLED: "true" # Wait until Keycloak is available
       KEYCLOAK_AVAILABILITYCHECK_TIMEOUT: "300s"
     config: 
