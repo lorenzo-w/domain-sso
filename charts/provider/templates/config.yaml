@@ -62,6 +62,7 @@ data:
   idp_cert_secret: {{ "idp-cert" | b64enc }}
 
   admin_group: {{ .Values.admin.group | b64enc }}
+  admin_email: {{ .Values.admin.email | b64enc }}
 
   oidc_issuer_url: {{ include "urls.idp" .  | b64enc }}
   saml_entrypoint_url: {{ include "urls.idp_saml_entrypoint" . | b64enc }}
