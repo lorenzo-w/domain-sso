@@ -17,7 +17,7 @@ spec:
     config:
       clientID: {{ include "get_sso_config" (dict "key" "internal_oidc_client_id" "context" $) }}
       clientSecret: {{ include "get_sso_config" (dict "key" "internal_oidc_client_secret" "context" $) }}
-      cookieSecret: {{ randAlphaNum 32 }}
+      cookieSecret: {{ include "get_sso_config" (dict "key" "authproxy_cookie_secret" "context" $) }}
       configFile: |-
         upstreams = "file:///dev/null"
         whitelist_domains = [ {{ printf ".%s" .Values.domain | quote }} ]
