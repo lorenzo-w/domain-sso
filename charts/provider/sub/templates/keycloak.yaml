@@ -387,8 +387,8 @@ spec:
                     userinfo.token.claim: "true"
                     claim.name: groups
           clients:
-            - clientId: {{ include "get_sso_config" (dict "key" "internal_oidc_client_name" "context" $) }}
-              name: {{ include "get_sso_config" (dict "key" "internal_oidc_client_name" "context" $) }}
+            - clientId: {{ include "get_sso_config" (dict "key" "internal_oidc_client_id" "context" $) }}
+              name: {{ include "get_sso_config" (dict "key" "internal_oidc_client_id" "context" $) }}
               description: "Internal OIDC client"
               enabled: true
               clientAuthenticatorType: client-secret

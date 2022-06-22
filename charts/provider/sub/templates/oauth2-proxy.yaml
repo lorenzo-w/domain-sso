@@ -15,7 +15,7 @@ spec:
     - name: keycloak-config
   values:
     config:
-      clientID: {{ include "get_sso_config" (dict "key" "internal_oidc_client_name" "context" $) }}
+      clientID: {{ include "get_sso_config" (dict "key" "internal_oidc_client_id" "context" $) }}
       clientSecret: {{ include "get_sso_config" (dict "key" "internal_oidc_client_secret" "context" $) }}
       cookieSecret: {{ randAlphaNum 32 }}
       configFile: |-
