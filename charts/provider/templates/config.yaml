@@ -39,7 +39,7 @@
 {{ printf "ou=roles,dc=%s" (.Values.domain | splitList "." | join ",dc=") }}
 {{- end -}}
 {{- define "dn.admin" -}}
-{{ printf "cn=admin,dc=%s" (.Values.domain | splitList "." | join ",dc=") | quote }}
+{{ printf "cn=admin,dc=%s" (.Values.domain | splitList "." | join ",dc=") }}
 {{- end -}}
 
 {{- define "class.users" -}}
