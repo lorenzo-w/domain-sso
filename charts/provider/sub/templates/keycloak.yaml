@@ -9,8 +9,8 @@ data:
 
   {{- if not (include "common.secrets.exists" (dict "secret" $idp_cert_secret "context" $)) -}}
   {{- $gen_cert := genSelfSignedCert .Values.domain nil nil 3650 -}}
-  {{- set $idp_cert "tls.crt" ($gen_cert.Cert | replace "\n" "" | trimPrefix "-----BEGIN CERTIFICATE-----" | trimSuffix "-----END CERTIFICATE-----" | b64enc) -}}
-  {{- set $idp_cert "tls.key" ($gen_cert.Key | replace "\n" "" | trimPrefix "-----BEGIN RSA PRIVATE KEY-----" | trimSuffix "-----END RSA PRIVATE KEY-----" | b64enc) -}}
+  {{- $_ := set $idp_cert "tls.crt" ($gen_cert.Cert | replace "\n" "" | trimPrefix "-----BEGIN CERTIFICATE-----" | trimSuffix "-----END CERTIFICATE-----" | b64enc) -}}
+  {{- $_ := set $idp_cert "tls.key" ($gen_cert.Key | replace "\n" "" | trimPrefix "-----BEGIN RSA PRIVATE KEY-----" | trimSuffix "-----END RSA PRIVATE KEY-----" | b64enc) -}}
   {{- else -}}
   {{- $idp_cert = (lookup "v1" "Secret" .Release.Namespace $idp_cert_secret).data -}}
   {{- end -}}
