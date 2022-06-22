@@ -81,7 +81,7 @@ data:
 
   authproxy_login_url: {{ include "urls.authproxy_login" . | b64enc }}
   authproxy_check_url: {{ include "urls.authproxy_check" . | b64enc }}
-  authproxy_cookie_secret: {{ include "common.secrets.passwords.manage" (dict "secret" .Values.configSecretName "key" "authproxy_cookie_secret" "providedValues" (list "") "context" $) }}
+  authproxy_cookie_secret: {{ include "common.secrets.passwords.manage" (dict "secret" .Values.configSecretName "key" "authproxy_cookie_secret" "providedValues" (list "") "length" 16 "context" $) }}
 
   keycloak_url: {{ include "urls.keycloak" . | b64enc }}
   keycloak_admin_user: {{ "admin" | b64enc }}
