@@ -2,7 +2,7 @@ apiVersion: v2
 name: domain-sso-provider
 description: A Helm chart to set up a full SSO stack with OIDC, SAML and LDAP for all services running on a domain and its subdomains
 type: application
-version: "0.1.19"
+version: "0.1.20"
 appVersion: "0.1.0"
 dependencies:
   - name: common

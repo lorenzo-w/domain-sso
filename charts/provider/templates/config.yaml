@@ -70,7 +70,7 @@ data:
   ldap_port: {{ "389" | b64enc }}
   ldap_base_dn: {{ include "dn.base" . | b64enc }}
   ldap_admin_dn: {{ include "dn.admin" . | b64enc }}
-  ldap_admin_pw: {{ include "common.secrets.passwords.manage" (dict "secret" .Values.configSecretName "key" "ldap_admin_pw" "providedValues" (list "admin.password") "context" $) | b64enc }}
+  ldap_admin_pw: {{ include "common.secrets.passwords.manage" (dict "secret" .Values.configSecretName "key" "ldap_admin_pw" "providedValues" (list "admin.password") "context" $) }}
   ldap_users_dn: {{ include "dn.users" . | b64enc }}
   ldap_groups_dn: {{ include "dn.groups" . | b64enc }}
   ldap_roles_dn: {{ include "dn.roles" . | b64enc }}
@@ -83,6 +83,6 @@ data:
 
   keycloak_url: {{ include "urls.keycloak" . | b64enc }}
   keycloak_admin_user: {{ "admin" | b64enc }}
-  keycloak_admin_pw: {{ include "common.secrets.passwords.manage" (dict "secret" .Values.configSecretName "key" "keycloak_admin_pw" "providedValues" (list "") "context" $) | b64enc }}
+  keycloak_admin_pw: {{ include "common.secrets.passwords.manage" (dict "secret" .Values.configSecretName "key" "keycloak_admin_pw" "providedValues" (list "") "context" $) }}
 
-  internal_oidc_client_secret: {{ include "common.secrets.passwords.manage" (dict "secret" .Values.configSecretName "key" "internal_oidc_client_secret" "providedValues" (list "") "context" $) | b64enc }}
+  internal_oidc_client_secret: {{ include "common.secrets.passwords.manage" (dict "secret" .Values.configSecretName "key" "internal_oidc_client_secret" "providedValues" (list "") "context" $) }}
