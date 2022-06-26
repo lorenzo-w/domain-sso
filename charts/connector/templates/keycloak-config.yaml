@@ -67,6 +67,7 @@ spec:
                 saml.signing.certificate: {{ index $secretData "tls.crt" | b64dec | quote }}
                 saml.force.post.binding: "false"
                 saml.signature.algorithm: RSA_SHA256
+                saml.assertion.signature: "true"
                 saml_name_id_format: email
                 {{ if eq $client.assertionConsumer.method "post" -}}
                 saml_assertion_consumer_url_post: {{ $client.assertionConsumer.url }}
