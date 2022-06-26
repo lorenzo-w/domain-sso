@@ -9,8 +9,13 @@ clients:
   #      secretName: ""
   saml: []
   #    - id: ""
-  #      redirectURIs:
-  #        - https://example.com/path
+  #      rootURL: ""
+  #      assertionConsumer:
+  #        method: "post" # "redirect" or "post"
+  #        url: "" # may be relative
+  #      logoutService:
+  #        method: "post" # "redirect" or "post"
+  #        url: "" # may be relative
   #      certSecretName: ""
 
 nameOverride: ""

@@ -55,10 +55,9 @@ spec:
               name: {{ $client.id }}
               description: "Internal SAML client"
               enabled: true
+              rootUrl: {{ $client.rootURL }}
               redirectUris: 
-              {{ range $uri := $client.redirectURIs -}}
-                - {{ $uri }}
-              {{ end -}}
+                - "*"
               webOrigins: 
                 - "*"
               frontchannelLogout: true
@@ -66,9 +65,22 @@ spec:
                 {{ $secretData := (lookup "v1" "Secret" $.Release.Namespace $client.certSecretName).data -}}
                 saml.signing.private.key: {{ index $secretData "tls.key" | b64dec | quote }}
                 saml.signing.certificate: {{ index $secretData "tls.crt" | b64dec | quote }}
-                saml.force.post.binding: "true"
+                saml.force.post.binding: "false"
                 saml.signature.algorithm: RSA_SHA256
                 saml_name_id_format: email
+                {{ if eq $client.assertionConsumer.method "post" -}}
+                saml_assertion_consumer_url_post: {{ $client.assertionConsumer.url }}
+                {{ end -}}
+                {{ if eq $client.assertionConsumer.method "redirect" -}}
+                saml_assertion_consumer_url_redirect: {{ $client.assertionConsumer.url }}
+                {{ end -}}
+                {{ if eq $client.logoutService.method "post" -}}
+                saml_single_logout_service_url_post: {{ $client.logoutService.url }}
+                {{ end -}}
+                {{ if eq $client.logoutService.method "redirect" -}}
+                saml_single_logout_service_url_redirect: {{ $client.logoutService.url }}
+                {{ end -}}
+
               protocolMappers:
                 - name: firstName
                   protocol: saml
