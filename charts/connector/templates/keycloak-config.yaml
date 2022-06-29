@@ -78,7 +78,7 @@ spec:
                 {{ end -}}
                 {{ if eq $client.logoutService.method "redirect" -}}
                 saml_single_logout_service_url_redirect: {{ $client.logoutService.url }}
-                {{ end -}}
+                {{- end }}
 
               protocolMappers:
                 - name: firstName
