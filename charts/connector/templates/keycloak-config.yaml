@@ -60,9 +60,13 @@ spec:
                 - "*"
               frontchannelLogout: true
               attributes:
+                {{ if $client.certSecretName -}}
                 {{ $secretData := (lookup "v1" "Secret" $.Release.Namespace $client.certSecretName).data -}}
                 saml.signing.private.key: {{ index $secretData "tls.key" | b64dec | quote }}
                 saml.signing.certificate: {{ index $secretData "tls.crt" | b64dec | quote }}
+                {{- else -}}
+                saml.client.signature:	"false"
+                {{ end -}}
                 saml.force.post.binding: "false"
                 saml.signature.algorithm: RSA_SHA256
                 saml.assertion.signature: "true"
@@ -73,13 +77,14 @@ spec:
                 {{ if eq $client.assertionConsumer.method "redirect" -}}
                 saml_assertion_consumer_url_redirect: {{ $client.assertionConsumer.url }}
                 {{ end -}}
+                {{ if $client.logoutService -}}
                 {{ if eq $client.logoutService.method "post" -}}
                 saml_single_logout_service_url_post: {{ $client.logoutService.url }}
                 {{ end -}}
                 {{ if eq $client.logoutService.method "redirect" -}}
                 saml_single_logout_service_url_redirect: {{ $client.logoutService.url }}
                 {{- end }}
-
+                {{- end }}
               protocolMappers:
                 - name: firstName
                   protocol: saml
@@ -88,4 +93,28 @@ spec:
                     attribute.nameformat: Basic
                     user.attribute: firstName
                     attribute.name: cn
+                - name: "X500 email"
+                  protocol: saml
+                  protocolMapper: saml-user-property-mapper
+                  config:
+                    attribute.name: urn:oid:1.2.840.113549.1.9.1
+                    attribute.nameformat: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
+                    friendly.name: email
+                    user.attribute: email
+                - name: "X500 givenName"
+                  protocol: saml
+                  protocolMapper: saml-user-property-mapper
+                  config:
+                    attribute.name: urn:oid:2.5.4.42
+                    attribute.nameformat: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
+                    friendly.name: givenName
+                    user.attribute: firstName
+                - name: "X500 surname"
+                  protocol: saml
+                  protocolMapper: saml-user-property-mapper
+                  config:
+                    attribute.name: urn:oid:2.5.4.4
+                    attribute.nameformat: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
+                    friendly.name: surname
+                    user.attribute: lastName
             {{ end -}}
