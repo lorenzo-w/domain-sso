@@ -64,8 +64,8 @@ spec:
                 {{ $secretData := (lookup "v1" "Secret" $.Release.Namespace $client.certSecretName).data -}}
                 saml.signing.private.key: {{ index $secretData "tls.key" | b64dec | quote }}
                 saml.signing.certificate: {{ index $secretData "tls.crt" | b64dec | quote }}
-                {{- else -}}
-                saml.client.signature:	"false"
+                {{ else -}}
+                saml.client.signature: "false"
                 {{ end -}}
                 saml.force.post.binding: "false"
                 saml.signature.algorithm: RSA_SHA256
