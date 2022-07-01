@@ -18,6 +18,9 @@
 {{- define "urls.authproxy_login" -}}
 {{ printf "https://%s/oauth2/start" (include "hosts.authproxy" .) }}
 {{- end -}}
+{{- define "urls.authproxy_logout" -}}
+{{ printf "https://%s/oauth2/sign_out" (include "hosts.authproxy" .) }}
+{{- end -}}
 {{- define "urls.authproxy_check" -}}
 {{ printf "https://%s/oauth2/auth" (include "hosts.authproxy" .) }}
 {{- end -}}
@@ -80,6 +83,7 @@ data:
   ldap_roles_class: {{ include "class.roles" . | b64enc }}
 
   authproxy_login_url: {{ include "urls.authproxy_login" . | b64enc }}
+  authproxy_logout_url: {{ include "urls.authproxy_logout" . | b64enc }}
   authproxy_check_url: {{ include "urls.authproxy_check" . | b64enc }}
   authproxy_cookie_secret: {{ include "common.secrets.passwords.manage" (dict "secret" .Values.configSecretName "key" "authproxy_cookie_secret" "providedValues" (list "") "length" 16 "context" $) }}
 
