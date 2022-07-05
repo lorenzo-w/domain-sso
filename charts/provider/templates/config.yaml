@@ -68,9 +68,9 @@ data:
   admin_email: {{ .Values.admin.email | b64enc }}
 
   oidc_issuer_url: {{ include "urls.idp" .  | b64enc }}
-  oidc_token_url: {{ printf "%s/protocol/openid-connect/token" (include "urls.idp" .) | b64enc }}
-  oidc_userinfo_url: {{ printf "%s/protocol/openid-connect/userinfo" (include "urls.idp" .) | b64enc }}
-  oidc_auth_url: {{ printf "%s/protocol/openid-connect/auth" (include "urls.idp" .) | b64enc }}
+  oidc_token_path: {{ "/protocol/openid-connect/token" | b64enc }}
+  oidc_userinfo_path: {{ "/protocol/openid-connect/userinfo" | b64enc }}
+  oidc_auth_path: {{ "/protocol/openid-connect/auth" | b64enc }}
 
   saml_entrypoint_url: {{ include "urls.idp_saml_entrypoint" . | b64enc }}
 
