@@ -62,8 +62,8 @@ spec:
               attributes:
                 {{ if $client.certSecretName -}}
                 {{ $secretData := (lookup "v1" "Secret" $.Release.Namespace $client.certSecretName).data -}}
-                saml.signing.private.key: {{ index $secretData "tls.key" | b64dec | quote }}
                 saml.signing.certificate: {{ index $secretData "tls.crt" | b64dec | quote }}
+                saml.client.signature: "true"
                 {{ else -}}
                 saml.client.signature: "false"
                 {{ end -}}
