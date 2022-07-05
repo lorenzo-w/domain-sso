@@ -68,6 +68,10 @@ data:
   admin_email: {{ .Values.admin.email | b64enc }}
 
   oidc_issuer_url: {{ include "urls.idp" .  | b64enc }}
+  oidc_token_url: {{ printf "%s/protocol/openid-connect/token" (include "urls.idp" .) | b64enc }}
+  oidc_userinfo_url: {{ printf "%s/protocol/openid-connect/userinfo" (include "urls.idp" .) | b64enc }}
+  oidc_auth_url: {{ printf "%s/protocol/openid-connect/auth" (include "urls.idp" .) | b64enc }}
+
   saml_entrypoint_url: {{ include "urls.idp_saml_entrypoint" . | b64enc }}
 
   ldap_host: {{ printf "openldap.%s.svc.cluster.local" .Release.Namespace | b64enc }}
