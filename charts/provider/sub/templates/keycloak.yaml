@@ -102,6 +102,14 @@ spec:
         inline:
           enabled: true
           realm: master
+          registrationAllowed: true
+          registrationEmailAsUsername: false
+          rememberMe: true
+          verifyEmail: true
+          loginWithEmailAllowed: true
+          duplicateEmailsAllowed: false
+          resetPasswordAllowed: true
+          editUsernameAllowed: false
           accessTokenLifespan: 600
           accessTokenLifespanForImplicitFlow: 1200
           ssoSessionIdleTimeout: 3600
