@@ -348,6 +348,8 @@ spec:
             - name: {{ include "get_sso_config" (dict "key" "admin_group" "context" $) }}
               realmRoles: 
                 - admin
+              attributes:
+                is_admin: ["true"]
           identityProviders:
             - alias: admin-oidc
               displayName: "Admin OIDC"
