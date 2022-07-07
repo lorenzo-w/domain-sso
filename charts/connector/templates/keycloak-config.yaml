@@ -81,6 +81,19 @@ spec:
                     jsonType.label: String
                     multivalued: 'false'
                     aggregate.attrs: ''
+                - name: is_admin
+                  protocol: openid-connect
+                  protocolMapper: oidc-usermodel-attribute-mapper
+                  consentRequired: false
+                  config:
+                    userinfo.token.claim: 'true'
+                    user.attribute: is_admin
+                    id.token.claim: 'true'
+                    access.token.claim: 'true'
+                    claim.name: is_admin
+                    jsonType.label: boolean
+                    multivalued: 'false'
+                    aggregate.attrs: ''
                 - name: groups
                   protocol: openid-connect
                   protocolMapper: oidc-group-membership-mapper
