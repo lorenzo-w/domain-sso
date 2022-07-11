@@ -451,7 +451,7 @@ spec:
                     user.attribute: is_admin
                     id.token.claim: 'true'
                     access.token.claim: 'true'
-                    claim.name: isAdmin
+                    claim.name: is_admin
                     jsonType.label: boolean
                     multivalued: 'false'
                     aggregate.attrs: ''
