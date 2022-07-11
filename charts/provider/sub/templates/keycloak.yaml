@@ -123,15 +123,16 @@ spec:
           defaultLocale: {{ index (.Values.org.defaultLocale | splitList "_") 0 }}
           components:
             org.keycloak.keys.KeyProvider:
-              - name: "rsa-generated"
-                providerId: "rsa-generated"
+              - name: "rsa"
+                providerId: "rsa"
                 subComponents: {}
                 config: 
                   privateKey:
                     - {{ index $idp_cert "tls.key" | b64dec | quote }}
                   certificate:
                     - {{ index $idp_cert "tls.crt" | b64dec | quote }} 
-                  priority: ["100"] 
+                  priority: ["200"] 
+                  algorithm: ["RSA256"]
               - name: "aes-generated"
                 providerId: "aes-generated"
                 subComponents: {}
