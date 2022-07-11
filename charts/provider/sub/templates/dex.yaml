@@ -51,6 +51,8 @@ spec:
           name: "Admin OIDC"
           redirectURIs: 
             - {{ include "urls.keycloak_oidc_callback" . }}
+      oauth2:
+        skipApprovalScreen: true
     ingress:
       enabled: true
       annotations:
