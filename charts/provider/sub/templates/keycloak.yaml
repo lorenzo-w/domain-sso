@@ -132,7 +132,7 @@ spec:
                   certificate:
                     - {{ index $idp_cert "tls.crt" | b64dec | quote }} 
                   priority: ["200"] 
-                  algorithm: ["RSA256"]
+                  algorithm: ["RS256"]
               - name: "aes-generated"
                 providerId: "aes-generated"
                 subComponents: {}
