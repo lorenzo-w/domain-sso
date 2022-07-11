@@ -121,6 +121,8 @@ spec:
           adminEventsDetailsEnabled: true
           internationalizationEnabled: true
           defaultLocale: {{ index (.Values.org.defaultLocale | splitList "_") 0 }}
+          displayName: {{ printf "%s Login" .Values.org.name }}
+          displayNameHtml: {{ printf "<div class=\"kc-logo-text\"><span>%s Login</span></div>" .Values.org.name }}
           components:
             org.keycloak.keys.KeyProvider:
               - name: "rsa"
