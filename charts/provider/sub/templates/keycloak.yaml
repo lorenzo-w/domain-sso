@@ -354,6 +354,11 @@ spec:
                 - admin
               attributes:
                 is_admin: ["true"]
+          users:
+            - username: admin
+              enabled: true
+              emailVerified: true
+              requiredActions: []
           identityProviders:
             - alias: admin-oidc
               displayName: "Admin OIDC"
