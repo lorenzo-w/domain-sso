@@ -117,6 +117,8 @@ spec:
           ssoSessionIdleTimeoutRememberMe: 172800
           ssoSessionMaxLifespanRememberMe: 2592000
           offlineSessionIdleTimeout: 5184000
+          adminEventsEnabled: true
+          adminEventsDetailsEnabled: true
           components:
             org.keycloak.keys.KeyProvider:
               - name: "rsa-generated"
