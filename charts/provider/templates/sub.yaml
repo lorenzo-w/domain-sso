@@ -20,3 +20,4 @@ spec:
       oauth2_proxy: {{ include "hosts.authproxy" . }}
     admin: {{ .Values.admin | toYaml | nindent 6 }}
     domain: {{ .Values.domain }}
+    org: {{ .Values.org | toYaml | nindent 6 }}

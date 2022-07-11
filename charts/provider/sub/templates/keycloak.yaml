@@ -119,6 +119,8 @@ spec:
           offlineSessionIdleTimeout: 5184000
           adminEventsEnabled: true
           adminEventsDetailsEnabled: true
+          internationalizationEnabled: true
+          defaultLocale: {{ .Values.org.defaultLocale | splitList "_" | index 0 }}
           components:
             org.keycloak.keys.KeyProvider:
               - name: "rsa-generated"
