@@ -12,6 +12,8 @@ spec:
         kind: HelmRepository
         name: dex
   values:
+    rbac:
+      createClusterScoped: false
     envVars:
       - name: IDP_CLIENT_ID
         value: {{ .Values.admin.idp.clientID }}
