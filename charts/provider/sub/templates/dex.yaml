@@ -20,9 +20,7 @@ spec:
     config:
       # See https://dexidp.io/docs/storage/ for more options
       storage:
-        type: kubernetes
-        config:
-          inCluster: true
+        type: memory
       issuer: {{ include "urls.dex_oidc_issuer" . }}
       connectors:     
         - type: {{ .Values.admin.idp.type }}
