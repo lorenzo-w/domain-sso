@@ -53,6 +53,13 @@ spec:
       tls: true
     service:
       type: ClusterIP
+    postgresql:
+      primary:
+        persistence:
+          size: 4Gi
+      readReplicas:
+        persistence:
+          size: 4Gi
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
