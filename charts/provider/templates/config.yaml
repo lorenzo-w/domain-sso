@@ -66,6 +66,7 @@ data:
 
   admin_group: {{ .Values.admin.group | b64enc }}
   admin_email: {{ .Values.admin.email | b64enc }}
+  admin_pw: {{ include "common.secrets.passwords.manage" (dict "secret" .Values.configSecretName "key" "admin_pw" "providedValues" (list "") "context" $) }}
 
   oidc_issuer_url: {{ include "urls.idp" .  | b64enc }}
   oidc_token_path: {{ "/protocol/openid-connect/token" | b64enc }}
