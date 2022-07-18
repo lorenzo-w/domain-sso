@@ -119,10 +119,10 @@ spec:
           editUsernameAllowed: false
           accessTokenLifespan: 600
           accessTokenLifespanForImplicitFlow: 1200
-          ssoSessionIdleTimeout: 3600
+          ssoSessionIdleTimeout: 7200
           ssoSessionMaxLifespan: 86400
-          ssoSessionIdleTimeoutRememberMe: 172800
-          ssoSessionMaxLifespanRememberMe: 2592000
+          ssoSessionIdleTimeoutRememberMe: 604800
+          ssoSessionMaxLifespanRememberMe: 5184000
           offlineSessionIdleTimeout: 5184000
           adminEventsEnabled: true
           adminEventsDetailsEnabled: true
