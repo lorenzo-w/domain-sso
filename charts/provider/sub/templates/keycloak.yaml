@@ -130,6 +130,18 @@ spec:
           defaultLocale: {{ index (.Values.org.defaultLocale | splitList "_") 0 }}
           displayName: {{ printf "%s Login" .Values.org.name }}
           displayNameHtml: {{ printf "<div class=\"kc-logo-text\"><span>%s Login</span></div>" .Values.org.name }}
+          smtpServer:
+            port: {{ .Values.smtp.port | quote }}
+            host: {{ .Values.smtp.host }}
+            {{ if eq .Values.smtp.tlsMode "ssl" -}}
+            ssl: 'true'
+            {{- else -}}
+            starttls: 'true'
+            {{- end }}
+            auth: 'true'
+            from: {{ .Values.smtp.senderAddress }}
+            user: {{ .Values.smtp.login | quote }}
+            password: {{ .Values.smtp.password | quote }}
           components:
             org.keycloak.keys.KeyProvider:
               - name: "rsa"
