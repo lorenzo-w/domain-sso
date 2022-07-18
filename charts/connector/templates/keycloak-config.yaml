@@ -88,6 +88,13 @@ spec:
                 {{- end }}
                 {{- end }}
               protocolMappers:
+                - name: name-id
+                  protocol: saml
+                  protocolMapper: saml-user-attribute-nameid-mapper
+                  consentRequired: false
+                  config:
+                    mapper.nameid.format: urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified
+                    user.attribute: email
                 - name: firstName
                   protocol: saml
                   protocolMapper: saml-user-attribute-mapper
