@@ -18,6 +18,23 @@ data:
   tls.crt: {{ index $idp_cert "tls.crt" }}
   tls.key: {{ index $idp_cert "tls.key" }}
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-theme-login
+data:
+  theme.properties: |
+    parent=keycloak
+    import=common/keycloak
+    styles=css/login.css css/styles.css
+  styles.css: |
+    .login-pf body {
+      background: rgb(47, 52, 61);
+    }
+    div.kc-logo-text {
+      background-image: url({{ .Values.org.logoURL }});
+    }
+---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
@@ -60,6 +77,27 @@ spec:
       readReplicas:
         persistence:
           size: 4Gi
+    extraVolumes:
+      - name: theme-login
+        configMap:
+          name: keycloak-theme-login
+    extraVolumeMounts:
+      - name: theme-login
+        mountPath: /opt/civi-cloud/themes/login
+        readOnly: true
+    initdbScripts:
+      setup_custom_theme.sh: |
+        #!/bin/bash
+
+        cd /opt/bitnami/keycloak/themes
+        mkdir ./civi-cloud
+        cd ./civi-cloud
+
+        mkdir ./login
+        cp /opt/civi-cloud/themes/login/theme.properties ./login
+        mkdir ./resources
+        mkdir ./resources/css
+        cp /opt/civi-cloud/themes/login/styles.css ./login/resources/css
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
