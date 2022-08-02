@@ -186,6 +186,7 @@ spec:
             from: {{ .Values.smtp.senderAddress }}
             user: {{ .Values.smtp.login | quote }}
             password: {{ .Values.smtp.password | quote }}
+          loginTheme: civi-cloud
           components:
             org.keycloak.keys.KeyProvider:
               - name: "rsa"
