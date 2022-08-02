@@ -2,7 +2,7 @@ apiVersion: v2
 name: domain-sso-connector
 description: Add OIDC or SAML clients to local domain-sso provider
 type: application
-version: "0.6.2"
+version: "0.8.0"
 appVersion: "0.1.0"
 dependencies:
   - name: common
