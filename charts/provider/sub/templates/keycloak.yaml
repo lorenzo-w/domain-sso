@@ -89,15 +89,21 @@ spec:
       setup_custom_theme.sh: |
         #!/bin/bash
 
+        # Create custom theme folder:
+
         cd /opt/bitnami/keycloak/themes
         mkdir ./civi-cloud
         cd ./civi-cloud
 
+        # Create login theme:
+
         mkdir ./login
-        cp /opt/civi-cloud/themes/login/theme.properties ./login
+        cd ./login
+        cp /opt/civi-cloud/themes/login/theme.properties ./
         mkdir ./resources
         mkdir ./resources/css
-        cp /opt/civi-cloud/themes/login/styles.css ./login/resources/css
+        cp /opt/civi-cloud/themes/login/styles.css ./resources/css
+        cd ..
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
