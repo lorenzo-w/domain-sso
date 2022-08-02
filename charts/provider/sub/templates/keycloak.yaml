@@ -29,10 +29,24 @@ data:
     styles=css/login.css css/styles.css
   styles.css: |
     .login-pf body {
-      background: rgb(47, 52, 61);
+      background: rgb(226, 231, 240);
     }
     div.kc-logo-text {
       background-image: url({{ .Values.org.logoURL }});
+      background-size: contain;
+      height: 150px;
+      background-position: center;
+    }
+    @media (max-width: 767px) {
+      div.kc-logo-text {
+        margin: auto;
+        width: auto;
+        height: 150px;
+        margin-bottom: 30px;
+      }
+      #kc-header-wrapper {
+        padding: 20px 0 0 0;
+      }
     }
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
