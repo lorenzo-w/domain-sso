@@ -21,3 +21,4 @@ spec:
     admin: {{ .Values.admin | toYaml | nindent 6 }}
     domain: {{ .Values.domain }}
     org: {{ .Values.org | toYaml | nindent 6 }}
+    smtp: {{ .Values.smtp | toYaml | nindent 6 }}
