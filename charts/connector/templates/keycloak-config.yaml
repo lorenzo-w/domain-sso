@@ -41,7 +41,6 @@ spec:
               webOrigins: 
                 - "*"
               defaultClientScopes:
-                - username
                 - email
                 - profile
               optionalClientScopes:
